@@ -12,6 +12,15 @@ const SYMBOL_MAZE_BORDER_RIGHT: char = '\u{2551}';
 const SYMBOL_MAZE_FIELD_ACCESSIBLE: char = ' ';
 const SYMBOL_MAZE_FIELD_BLOCKED: char = '\u{2588}';
 
+#[derive(Debug, Default)]
+enum MazeGenerationAlgorithm {
+    #[default]
+    Kruskal,
+}
+
+#[derive(Debug)]
+enum MazeSolvingAlgorithm {}
+
 struct Maze {
     width: usize,
     height: usize,
@@ -55,8 +64,17 @@ impl Maze {
         println!("{}", SYMBOL_MAZE_BORDER_CORNER_BOTTOM_RIGHT);
     }
 
-    fn generate_maze(&mut self) {
+    fn generate_maze(&mut self, algorithm: MazeGenerationAlgorithm) {
+        match algorithm {
+            MazeGenerationAlgorithm::Kruskal => self.generate_maze_kruskal(),
+        }
+    }
+
+    fn generate_maze_kruskal(&mut self) {
         let mut forest: Vec<Vec<(usize, usize)>> = vec![];
+
+        // Fill the forest with small trees. Each tree contains at the
+        // beginning only one cell.
         for row in (1..self.height - 1).step_by(2) {
             for col in (1..self.width - 1).step_by(2) {
                 forest.push(vec![(row, col)]);
@@ -64,18 +82,20 @@ impl Maze {
             }
         }
 
+        // Get all possible edges. We will not use all but only that much
+        // until all our trees in the forest will be connected to one big tree.
         let mut edges: Vec<(usize, usize)> = vec![];
         for row in (2..self.height - 1).step_by(2) {
             for col in (1..self.width - 1).step_by(2) {
                 edges.push((row, col));
             }
         }
-
         for row in (1..self.height - 1).step_by(2) {
             for col in (2..self.width - 1).step_by(2) {
                 edges.push((row, col));
             }
         }
+        // Shuffle them.
         edges.shuffle(&mut thread_rng());
 
         while forest.len() > 1 {
@@ -86,8 +106,7 @@ impl Maze {
 
             if ce_row % 2 == 0 {
                 tree1 = forest
-                    .clone()
-                    .into_iter()
+                    .iter()
                     .enumerate()
                     .map(|(idx, tree)| {
                         if tree.contains(&(ce_row - 1, ce_col)) {
@@ -99,8 +118,7 @@ impl Maze {
                     .sum();
 
                 tree2 = forest
-                    .clone()
-                    .into_iter()
+                    .iter()
                     .enumerate()
                     .map(|(idx, tree)| {
                         if tree.contains(&(ce_row + 1, ce_col)) {
@@ -112,8 +130,7 @@ impl Maze {
                     .sum();
             } else {
                 tree1 = forest
-                    .clone()
-                    .into_iter()
+                    .iter()
                     .enumerate()
                     .map(|(idx, tree)| {
                         if tree.contains(&(ce_row, ce_col - 1)) {
@@ -125,8 +142,7 @@ impl Maze {
                     .sum();
 
                 tree2 = forest
-                    .clone()
-                    .into_iter()
+                    .iter()
                     .enumerate()
                     .map(|(idx, tree)| {
                         if tree.contains(&(ce_row, ce_col + 1)) {
@@ -154,7 +170,7 @@ impl Maze {
 }
 
 fn main() {
-    let mut maze = Maze::new(81, 41);
-    maze.generate_maze();
+    let mut maze = Maze::new(81, 81);
+    maze.generate_maze(MazeGenerationAlgorithm::default());
     maze.draw();
 }
