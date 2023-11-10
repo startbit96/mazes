@@ -14,6 +14,7 @@
           rustfmt
           rust-analyzer
           clippy
+          libiconv # https://stackoverflow.com/questions/68679040/error-linking-with-cc-failed-exit-code-1-for-cargo-run
         ];
       };
       
