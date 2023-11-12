@@ -1,5 +1,6 @@
 use crate::maze::generator::MazeGenerator;
 use crate::maze::Maze;
+
 use rand::seq::SliceRandom;
 use rand::thread_rng;
 
