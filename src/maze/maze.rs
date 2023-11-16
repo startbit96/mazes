@@ -5,11 +5,31 @@ use std::io::Write;
 const MAZE_EDGE_LENGTH_MIN: usize = 11;
 const MAZE_EDGE_LENGTH_MAX: usize = 201;
 
+pub enum CellType {
+    Path,
+    Wall,
+}
+
+pub struct MazeCell {
+    pub cell_type: CellType,
+    pub was_visited: bool,
+    pub is_on_current_path: bool,
+}
+
 pub struct Maze {
     pub width: usize,
     pub height: usize,
     pub data: Vec<Vec<bool>>,
 }
+
+// What informations holds single cell?
+// - wall / path
+// - visited
+// - on current path
+
+// solution of the maze:
+// Vec<(usize, usize)> route
+// update route: check for first occurence of last value,
 
 impl Maze {
     /// Creates a new maze instance with the given dimensions.

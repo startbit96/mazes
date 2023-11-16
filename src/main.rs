@@ -28,6 +28,21 @@ fn main() {
     terminal_ui::intialize_terminal_ui(&mut screen);
     maze.generate(&Kruskal);
     maze.draw(&mut screen);
+    maze::draw::draw_path(
+        &mut screen,
+        &maze,
+        vec![
+            (1, 1),
+            (1, 2),
+            (1, 3),
+            (1, 4),
+            (2, 4),
+            (3, 4),
+            (4, 4),
+            (4, 3),
+            (4, 2),
+        ],
+    );
 
     // Save the current terminal size so that we can react if the size changes.
     let mut terminal_size = termion::terminal_size().unwrap();
