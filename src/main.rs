@@ -27,7 +27,6 @@ fn main() {
     // Draw terminal ui and the maze.
     terminal_ui::intialize_terminal_ui(&mut screen);
     maze.generate(&Kruskal);
-    maze.generate_graph();
     maze.draw(&mut screen);
     /*
     maze::draw::draw_path(

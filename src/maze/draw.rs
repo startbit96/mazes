@@ -24,7 +24,23 @@ fn calculate_maze_position(maze: &Maze) -> (u16, u16) {
     );
 }
 
+pub fn erase_maze<W: Write>(screen: &mut W, maze: &Maze) {
+    let (maze_pos_x, maze_pos_y) = calculate_maze_position(maze);
+    for row in 0..maze.height {
+        write!(
+            screen,
+            "{}{}",
+            termion::cursor::Goto(maze_pos_x, maze_pos_y + row as u16),
+            std::iter::repeat(SYMBOL_MAZE_FIELD_BLOCKED)
+                .take(maze.width)
+                .collect::<String>()
+        )
+        .unwrap();
+    }
+}
+
 pub fn draw_maze<W: Write>(screen: &mut W, maze: &Maze) {
+    erase_maze(screen, maze);
     let (maze_pos_x, maze_pos_y) = calculate_maze_position(maze);
     for row in 0..maze.height {
         write!(

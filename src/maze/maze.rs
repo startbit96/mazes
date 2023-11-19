@@ -94,6 +94,7 @@ impl Maze {
     pub fn generate(&mut self, generator: &dyn MazeGenerator) {
         self.reset();
         generator.generate(self);
+        self.generate_graph();
     }
 
     pub fn draw<W: Write>(&self, screen: &mut W) {
@@ -113,9 +114,6 @@ impl Maze {
                         self.data[row][col + 1],
                     ) {
                         // (left, right, up, down)
-                        // passages horizontal and vertical.
-                        (false, false, true, true) => false,
-                        (true, true, false, false) => false,
                         // curve.
                         (false, true, false, true) => true,
                         (true, false, false, true) => true,
