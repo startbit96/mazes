@@ -14,12 +14,14 @@ pub struct MazeCell {
     pub cell_type: CellType,
     pub was_visited: bool,
     pub is_on_current_path: bool,
+    pub is_node: bool,
 }
 
 pub struct Maze {
     pub width: usize,
     pub height: usize,
     pub data: Vec<Vec<bool>>,
+    pub is_node: Vec<Vec<bool>>,
 }
 
 // What informations holds single cell?
@@ -54,6 +56,7 @@ impl Maze {
             width,
             height,
             data: vec![vec![false; width]; height],
+            is_node: vec![vec![false; width]; height],
         }
     }
 
@@ -95,5 +98,44 @@ impl Maze {
 
     pub fn draw<W: Write>(&self, screen: &mut W) {
         draw_maze(screen, self);
+    }
+
+    pub fn generate_graph(&mut self) {
+        for (row, data_row) in self.data.iter().enumerate() {
+            for (col, datum) in data_row.iter().enumerate() {
+                if datum == &false {
+                    self.is_node[row][col] = false;
+                } else {
+                    self.is_node[row][col] = match (
+                        self.data[row - 1][col],
+                        self.data[row + 1][col],
+                        self.data[row][col - 1],
+                        self.data[row][col + 1],
+                    ) {
+                        // (left, right, up, down)
+                        // passages horizontal and vertical.
+                        (false, false, true, true) => false,
+                        (true, true, false, false) => false,
+                        // curve.
+                        (false, true, false, true) => true,
+                        (true, false, false, true) => true,
+                        (false, true, true, false) => true,
+                        (true, false, true, false) => true,
+                        // dead end.
+                        (false, false, false, true) => true,
+                        (false, false, true, false) => true,
+                        (false, true, false, false) => true,
+                        (true, false, false, false) => true,
+                        // crossway.
+                        (true, true, true, false) => true,
+                        (true, true, false, true) => true,
+                        (true, false, true, true) => true,
+                        (false, true, true, true) => true,
+                        (true, true, true, true) => true,
+                        _ => false,
+                    };
+                }
+            }
+        }
     }
 }

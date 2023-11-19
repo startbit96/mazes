@@ -33,10 +33,16 @@ pub fn draw_maze<W: Write>(screen: &mut W, maze: &Maze) {
             termion::cursor::Goto(maze_pos_x, maze_pos_y + row as u16),
             maze.data[row]
                 .iter()
-                .map(|datum| if datum == &true {
-                    SYMBOL_MAZE_FIELD_ACCESSIBLE
-                } else {
-                    SYMBOL_MAZE_FIELD_BLOCKED
+                .enumerate()
+                .map(|(col, datum)| match (*datum, maze.is_node[row][col]) {
+                    (true, false) => SYMBOL_MAZE_FIELD_ACCESSIBLE.to_string(),
+                    (true, true) => format!(
+                        "{}{}{}",
+                        termion::color::Bg(termion::color::Green),
+                        SYMBOL_MAZE_FIELD_ACCESSIBLE,
+                        termion::color::Bg(termion::color::Reset)
+                    ),
+                    _ => SYMBOL_MAZE_FIELD_BLOCKED.to_string(),
                 })
                 .collect::<String>()
         )

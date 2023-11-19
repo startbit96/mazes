@@ -27,7 +27,9 @@ fn main() {
     // Draw terminal ui and the maze.
     terminal_ui::intialize_terminal_ui(&mut screen);
     maze.generate(&Kruskal);
+    maze.generate_graph();
     maze.draw(&mut screen);
+    /*
     maze::draw::draw_path(
         &mut screen,
         &maze,
@@ -41,8 +43,15 @@ fn main() {
             (4, 4),
             (4, 3),
             (4, 2),
+            (4, 1),
+            (5, 1),
+            (6, 1),
+            (7, 1),
+            (7, 2),
+            (7, 3),
         ],
     );
+    */
 
     // Save the current terminal size so that we can react if the size changes.
     let mut terminal_size = termion::terminal_size().unwrap();
