@@ -78,7 +78,49 @@ pub fn draw_character<W: Write>(screen: &mut W, maze: &Maze, pos: (u16, u16), ch
     .unwrap();
 }
 
+fn complete_path(path: Vec<(u16, u16)>) -> Vec<(u16, u16)> {
+    // This function only implements straight lines, if more is needed, Bresenham will be implemented.
+    path.windows(2)
+        .enumerate()
+        .flat_map(
+            |(idx, window)| match (window[0].0 == window[1].0, window[0].1 == window[1].1) {
+                (true, false) => {
+                    // Vertical line, x stays the same.
+                    let mut part_of_path = (window[0].1.min(window[1].1)
+                        ..=window[0].1.max(window[1].1))
+                        .map(|y| (window[0].0, y))
+                        .collect::<Vec<(u16, u16)>>();
+                    if window[0].1 > window[1].1 {
+                        part_of_path.reverse();
+                    }
+                    if idx > 0 {
+                        part_of_path.remove(0);
+                    }
+                    part_of_path
+                }
+                (false, true) => {
+                    // Horizontal line, y stays the same.
+                    let mut part_of_path = (window[0].0.min(window[1].0)
+                        ..=window[0].0.max(window[1].0))
+                        .map(|x| (x, window[0].1))
+                        .collect::<Vec<(u16, u16)>>();
+                    if window[0].0 > window[1].0 {
+                        part_of_path.reverse();
+                    }
+                    if idx > 0 {
+                        part_of_path.remove(0);
+                    }
+
+                    part_of_path
+                }
+                _ => unreachable!(),
+            },
+        )
+        .collect()
+}
+
 pub fn draw_path<W: Write>(screen: &mut W, maze: &Maze, path: Vec<(u16, u16)>) {
+    let path = complete_path(path);
     path.iter().enumerate().for_each(|(idx, pos)| {
         let pos_prev = if idx > 0 { path[idx - 1] } else { *pos };
         let pos_next = if idx < path.len() - 1 {
