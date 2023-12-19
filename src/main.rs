@@ -21,32 +21,15 @@ fn main() {
     write!(screen, "{}{}", termion::cursor::Hide, ToAlternateScreen).unwrap();
     screen.flush().unwrap();
 
-    // Initialize our maze struct.
-    let mut maze = Maze::new(41, 21);
-
     // Draw terminal ui and the maze.
     terminal_ui::intialize_terminal_ui(&mut screen);
+    let (max_maze_width, max_maze_height) = terminal_ui::get_max_draw_size();
+    let mut maze = Maze::new(max_maze_width, max_maze_height);
     maze.generate(&Kruskal);
     maze.draw(&mut screen);
-    maze::draw::draw_path(
-        &mut screen,
-        &maze,
-        vec![(0, 0), (0, 3), (3, 3), (3, 0), (1, 0)],
-    );
-
-    // Save the current terminal size so that we can react if the size changes.
-    let mut terminal_size = termion::terminal_size().unwrap();
 
     // The main loop that keeps the program alive. q breaks it.
     for c in stdin.keys() {
-        // Everytime an input event happens, we need also to check if the
-        // terminal got resized. An event for this would be nicer.
-        // THIS DOES CURRENTLY NOT WORK!
-        if terminal_size != termion::terminal_size().unwrap() {
-            terminal_size = termion::terminal_size().unwrap();
-            terminal_ui::intialize_terminal_ui(&mut screen);
-        }
-
         // Process the input.
         match c.unwrap() {
             Key::Char('q') => break,
@@ -54,6 +37,20 @@ fn main() {
                 maze.generate(&Kruskal);
                 maze.draw(&mut screen);
             }
+            Key::Up | Key::Char('k') => {
+                if maze.change_size(maze.width + 2, maze.height + 2) {
+                    maze.generate(&Kruskal);
+                    maze.draw(&mut screen);
+                }
+            }
+            Key::Down | Key::Char('j') => {
+                if maze.change_size(maze.width - 2, maze.height - 2) {
+                    terminal_ui::erase_draw_area(&mut screen);
+                    maze.generate(&Kruskal);
+                    maze.draw(&mut screen);
+                }
+            }
+            Key::Char('g') => {}
             _ => {}
         }
         screen.flush().unwrap();

@@ -3,84 +3,77 @@ use crate::maze::generator::MazeGenerator;
 use std::io::Write;
 
 const MAZE_EDGE_LENGTH_MIN: usize = 11;
-const MAZE_EDGE_LENGTH_MAX: usize = 201;
-
-pub enum CellType {
-    Path,
-    Wall,
-}
-
-pub struct MazeCell {
-    pub cell_type: CellType,
-    pub was_visited: bool,
-    pub is_on_current_path: bool,
-    pub is_node: bool,
-}
+const MAZE_DEFAULT_WIDTH: usize = 21;
+const MAZE_DEFAULT_HEIGHT: usize = 21;
+const FORCE_SQUARE_MAZES: bool = true;
 
 pub struct Maze {
     pub width: usize,
     pub height: usize,
+    pub max_width: usize,
+    pub max_height: usize,
     pub data: Vec<Vec<bool>>,
     pub is_node: Vec<Vec<bool>>,
 }
 
-// What informations holds single cell?
-// - wall / path
-// - visited
-// - on current path
-
-// solution of the maze:
-// Vec<(usize, usize)> route
-// update route: check for first occurence of last value,
-
 impl Maze {
-    /// Creates a new maze instance with the given dimensions.
-    /// The given dimensions will be checked and corrected if necessary by
-    /// the function `Maze::check_edge_length`.
-    /// Note that the maze will not be generated using this function, it will
-    /// only provide an empty maze with only walls and no paths. To generate a
-    /// maze, see `Maze::generate`.
-    ///
-    /// # Arguments
-    ///
-    /// * `width` - the width of the maze (needs to be odd and within `MAZE_EDGE_LENGTH_MIN` and `MAZE_EDGE_LENGTH_MAX`)
-    /// * `height` - the height of the maze (needs to be odd and within `MAZE_EDGE_LENGTH_MIN` and `MAZE_EDGE_LENGTH_MAX`)
-    ///
-    /// # Returns
-    ///
-    /// A Maze instance.
-    pub fn new(width: usize, height: usize) -> Self {
-        let width = Maze::check_edge_length(width);
-        let height = Maze::check_edge_length(height);
+    pub fn new(max_width: usize, max_height: usize) -> Self {
+        // The max width and max height are were given by the terminal ui.
+        // Make sure these numbers are odd.
+        let max_width = match max_width % 2 {
+            0 => max_width - 1,
+            1 => max_width,
+            _ => unreachable!(),
+        };
+        let max_height = match max_height % 2 {
+            0 => max_height - 1,
+            1 => max_height,
+            _ => unreachable!(),
+        };
+        let mut width = Maze::check_edge_length(MAZE_DEFAULT_WIDTH, max_width);
+        let mut height = Maze::check_edge_length(MAZE_DEFAULT_HEIGHT, max_height);
+        if FORCE_SQUARE_MAZES {
+            width = width.min(height);
+            height = width;
+        }
         Maze {
             width,
             height,
-            data: vec![vec![false; width]; height],
+            max_width,
+            max_height,
+            data: vec![vec![false; height]; height],
             is_node: vec![vec![false; width]; height],
         }
     }
 
-    /// Checks the given edge length and corrects the input to be odd and within
-    /// the given range if necessary.
-    ///
-    /// # Arguments
-    ///
-    /// * `edge_length` - the given edge length that needs to be checked
-    ///
-    /// # Returns
-    ///
-    /// The corrected edge length or - if it already fulfills the requirements - the
-    /// given edge length.
-    fn check_edge_length(edge_length: usize) -> usize {
+    fn check_edge_length(edge_length: usize, max_length: usize) -> usize {
         if edge_length < MAZE_EDGE_LENGTH_MIN {
             MAZE_EDGE_LENGTH_MIN
-        } else if edge_length > MAZE_EDGE_LENGTH_MAX {
-            MAZE_EDGE_LENGTH_MAX
+        } else if edge_length > max_length {
+            max_length
         } else if edge_length % 2 == 0 {
             edge_length + 1
         } else {
             edge_length
         }
+    }
+
+    pub fn change_size(&mut self, width: usize, height: usize) -> bool {
+        let mut width = Maze::check_edge_length(width, self.max_width);
+        let mut height = Maze::check_edge_length(height, self.max_height);
+        if FORCE_SQUARE_MAZES {
+            width = width.min(height);
+            height = width;
+        }
+        if width == self.width && height == self.height {
+            // Cannot make the mazer smaller / bigger.
+            return false;
+        }
+        self.width = width;
+        self.height = height;
+        self.data = vec![vec![false; width]; height];
+        self.is_node = vec![vec![false; width]; height];
+        return true;
     }
 
     fn reset(&mut self) {
@@ -99,6 +92,10 @@ impl Maze {
 
     pub fn draw<W: Write>(&self, screen: &mut W) {
         draw_maze(screen, self);
+    }
+
+    pub fn erase<W: Write>(&self, screen: &mut W) {
+        erase_maze(screen, self);
     }
 
     pub fn generate_graph(&mut self) {

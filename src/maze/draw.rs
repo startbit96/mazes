@@ -3,6 +3,7 @@ use std::io::Write;
 
 const SYMBOL_MAZE_FIELD_ACCESSIBLE: char = ' ';
 const SYMBOL_MAZE_FIELD_BLOCKED: char = '█';
+const SYMBOL_MAZE_ERASED: char = ' ';
 
 const SYMBOL_MAZE_PATH_HORIZONTAL: char = '─';
 const SYMBOL_MAZE_PATH_VERTICAL: char = '│';
@@ -16,11 +17,27 @@ const SYMBOL_MAZE_PATH_DEAD_END_LEFT: char = '╾';
 const SYMBOL_MAZE_PATH_DEAD_END_RIGHT: char = '╼';
 const SYMBOL_MAZE_PATH_SINGLE_POSITION: char = '╳';
 
+#[derive(Debug, PartialEq, Eq)]
+enum PathOrientation {
+    Horizontal,
+    Vertical,
+}
+
+impl PathOrientation {
+    fn from_points(pos1: (u16, u16), pos2: (u16, u16)) -> Self {
+        match (pos1.0 == pos2.0, pos1.1 == pos2.1) {
+            (true, false) => PathOrientation::Vertical,
+            (false, true) => PathOrientation::Horizontal,
+            _ => panic!("Diagonally is currently not supported."),
+        }
+    }
+}
+
 fn calculate_maze_position(maze: &Maze) -> (u16, u16) {
     let (terminal_width, terminal_height) = termion::terminal_size().unwrap();
     return (
-        (terminal_width - maze.width as u16) / 2,
-        (terminal_height - maze.height as u16) / 2,
+        (terminal_width - maze.width as u16) / 2 + 1,
+        (terminal_height - maze.height as u16) / 2 + 1,
     );
 }
 
@@ -31,7 +48,7 @@ pub fn erase_maze<W: Write>(screen: &mut W, maze: &Maze) {
             screen,
             "{}{}",
             termion::cursor::Goto(maze_pos_x, maze_pos_y + row as u16),
-            std::iter::repeat(SYMBOL_MAZE_FIELD_BLOCKED)
+            std::iter::repeat(SYMBOL_MAZE_ERASED)
                 .take(maze.width)
                 .collect::<String>()
         )
@@ -78,44 +95,42 @@ pub fn draw_character<W: Write>(screen: &mut W, maze: &Maze, pos: (u16, u16), ch
     .unwrap();
 }
 
+fn complete_line(pos_from: (u16, u16), pos_to: (u16, u16)) -> Vec<(u16, u16)> {
+    let orientation = PathOrientation::from_points(pos_from, pos_to);
+    match orientation {
+        PathOrientation::Vertical => {
+            let mut line = (pos_from.1.min(pos_to.1)..=pos_from.1.max(pos_to.1))
+                .map(|y| (pos_from.0, y))
+                .collect::<Vec<(u16, u16)>>();
+            if pos_from.1 > pos_to.1 {
+                line.reverse();
+            }
+            return line;
+        }
+        PathOrientation::Horizontal => {
+            let mut line = (pos_from.0.min(pos_to.0)..=pos_from.0.max(pos_to.0))
+                .map(|x| (x, pos_from.1))
+                .collect::<Vec<(u16, u16)>>();
+            if pos_from.0 > pos_to.0 {
+                line.reverse();
+            }
+            return line;
+        }
+    }
+}
+
 fn complete_path(path: Vec<(u16, u16)>) -> Vec<(u16, u16)> {
     // This function only implements straight lines, if more is needed, Bresenham will be implemented.
     path.windows(2)
         .enumerate()
-        .flat_map(
-            |(idx, window)| match (window[0].0 == window[1].0, window[0].1 == window[1].1) {
-                (true, false) => {
-                    // Vertical line, x stays the same.
-                    let mut part_of_path = (window[0].1.min(window[1].1)
-                        ..=window[0].1.max(window[1].1))
-                        .map(|y| (window[0].0, y))
-                        .collect::<Vec<(u16, u16)>>();
-                    if window[0].1 > window[1].1 {
-                        part_of_path.reverse();
-                    }
-                    if idx > 0 {
-                        part_of_path.remove(0);
-                    }
-                    part_of_path
-                }
-                (false, true) => {
-                    // Horizontal line, y stays the same.
-                    let mut part_of_path = (window[0].0.min(window[1].0)
-                        ..=window[0].0.max(window[1].0))
-                        .map(|x| (x, window[0].1))
-                        .collect::<Vec<(u16, u16)>>();
-                    if window[0].0 > window[1].0 {
-                        part_of_path.reverse();
-                    }
-                    if idx > 0 {
-                        part_of_path.remove(0);
-                    }
-
-                    part_of_path
-                }
-                _ => unreachable!(),
-            },
-        )
+        .flat_map(|(idx, window)| {
+            let mut line = complete_line(window[0], window[1]);
+            if idx > 0 {
+                // Otherwise we would have the junctions twice.
+                line.remove(0);
+            }
+            line
+        })
         .collect()
 }
 
