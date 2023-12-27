@@ -1,5 +1,4 @@
-use crate::maze::draw::*;
-use crate::maze::generator::MazeGenerator;
+use crate::maze::{draw::*, generator::MazeGenerator};
 use std::io::Write;
 
 const MAZE_EDGE_LENGTH_MIN: usize = 11;
@@ -87,18 +86,18 @@ impl Maze {
     pub fn generate(&mut self, generator: &dyn MazeGenerator) {
         self.reset();
         generator.generate(self);
-        self.generate_graph();
+        self.generate_tree();
     }
 
-    pub fn draw<W: Write>(&self, screen: &mut W) {
-        draw_maze(screen, self);
+    pub fn draw<W: Write>(&self, screen: &mut W, show_graph: bool) {
+        draw_maze(screen, self, show_graph);
     }
 
     pub fn erase<W: Write>(&self, screen: &mut W) {
         erase_maze(screen, self);
     }
 
-    pub fn generate_graph(&mut self) {
+    pub fn generate_tree(&mut self) {
         for (row, data_row) in self.data.iter().enumerate() {
             for (col, datum) in data_row.iter().enumerate() {
                 if datum == &false {

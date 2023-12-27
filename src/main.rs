@@ -21,12 +21,15 @@ fn main() {
     write!(screen, "{}{}", termion::cursor::Hide, ToAlternateScreen).unwrap();
     screen.flush().unwrap();
 
+    // To toggle visualization options.
+    let mut show_graph: bool = false;
+
     // Draw terminal ui and the maze.
     terminal_ui::intialize_terminal_ui(&mut screen);
     let (max_maze_width, max_maze_height) = terminal_ui::get_max_draw_size();
     let mut maze = Maze::new(max_maze_width, max_maze_height);
     maze.generate(&Kruskal);
-    maze.draw(&mut screen);
+    maze.draw(&mut screen, show_graph);
 
     // The main loop that keeps the program alive. q breaks it.
     for c in stdin.keys() {
@@ -34,23 +37,30 @@ fn main() {
         match c.unwrap() {
             Key::Char('q') => break,
             Key::Char('r') => {
+                // Recreate.
                 maze.generate(&Kruskal);
-                maze.draw(&mut screen);
+                maze.draw(&mut screen, show_graph);
             }
             Key::Up | Key::Char('k') => {
+                // Increase size.
                 if maze.change_size(maze.width + 2, maze.height + 2) {
                     maze.generate(&Kruskal);
-                    maze.draw(&mut screen);
+                    maze.draw(&mut screen, show_graph);
                 }
             }
             Key::Down | Key::Char('j') => {
+                // Decrease size.
                 if maze.change_size(maze.width - 2, maze.height - 2) {
                     terminal_ui::erase_draw_area(&mut screen);
                     maze.generate(&Kruskal);
-                    maze.draw(&mut screen);
+                    maze.draw(&mut screen, show_graph);
                 }
             }
-            Key::Char('g') => {}
+            Key::Char('g') => {
+                // Show / hide graph nodes.
+                show_graph = !show_graph;
+                maze.draw(&mut screen, show_graph);
+            }
             _ => {}
         }
         screen.flush().unwrap();

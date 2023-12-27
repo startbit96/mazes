@@ -5,6 +5,10 @@ const SYMBOL_MAZE_FIELD_ACCESSIBLE: char = ' ';
 const SYMBOL_MAZE_FIELD_BLOCKED: char = '█';
 const SYMBOL_MAZE_ERASED: char = ' ';
 
+const SYMBOL_MAZE_GRAPH_NODE: char = '◉';
+const SYMBOL_MAZE_GRAPH_CONNECTION_HORIZONTAL: char = '─';
+const SYMBOL_MAZE_GRAPH_CONNECTION_VERTICAL: char = '│';
+
 const SYMBOL_MAZE_PATH_HORIZONTAL: char = '─';
 const SYMBOL_MAZE_PATH_VERTICAL: char = '│';
 const SYMBOL_MAZE_PATH_CURVE_LEFT_UP: char = '╯';
@@ -56,7 +60,7 @@ pub fn erase_maze<W: Write>(screen: &mut W, maze: &Maze) {
     }
 }
 
-pub fn draw_maze<W: Write>(screen: &mut W, maze: &Maze) {
+pub fn draw_maze<W: Write>(screen: &mut W, maze: &Maze, show_graph: bool) {
     erase_maze(screen, maze);
     let (maze_pos_x, maze_pos_y) = calculate_maze_position(maze);
     for row in 0..maze.height {
@@ -66,17 +70,19 @@ pub fn draw_maze<W: Write>(screen: &mut W, maze: &Maze) {
             termion::cursor::Goto(maze_pos_x, maze_pos_y + row as u16),
             maze.data[row]
                 .iter()
+                .zip(maze.is_node[row].iter())
                 .enumerate()
-                .map(|(col, datum)| match (*datum, maze.is_node[row][col]) {
-                    (true, false) => SYMBOL_MAZE_FIELD_ACCESSIBLE.to_string(),
-                    (true, true) => format!(
-                        "{}{}{}",
-                        termion::color::Bg(termion::color::Green),
-                        SYMBOL_MAZE_FIELD_ACCESSIBLE,
-                        termion::color::Bg(termion::color::Reset)
-                    ),
-                    _ => SYMBOL_MAZE_FIELD_BLOCKED.to_string(),
-                })
+                .map(
+                    |(col, (is_accessible, is_node))| match (is_accessible, is_node, show_graph) {
+                        (false, _, _) => SYMBOL_MAZE_FIELD_BLOCKED,
+                        (true, _, false) => SYMBOL_MAZE_FIELD_ACCESSIBLE,
+                        (true, true, true) => SYMBOL_MAZE_GRAPH_NODE,
+                        (true, false, true) => match maze.data[row][col - 1] {
+                            true => SYMBOL_MAZE_GRAPH_CONNECTION_HORIZONTAL,
+                            false => SYMBOL_MAZE_GRAPH_CONNECTION_VERTICAL,
+                        },
+                    }
+                )
                 .collect::<String>()
         )
         .unwrap();
