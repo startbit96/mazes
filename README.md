@@ -17,6 +17,7 @@ Maze-generation and maze-solving written in Rust.
 | `j` or `↓` | decrease size of the maze |  
 | `g` | toggle graph visualization on / off |  
 | `a` | toggle animation on / off |  
+| `q` | quit the application |  
 
 ## Notes.
 
