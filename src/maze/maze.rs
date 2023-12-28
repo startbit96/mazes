@@ -83,21 +83,26 @@ impl Maze {
         }
     }
 
-    pub fn generate(&mut self, generator: &dyn MazeGenerator) {
+    pub fn generate(
+        &mut self,
+        generator: &dyn MazeGenerator,
+        screen: &mut dyn Write,
+        animate: bool,
+    ) {
         self.reset();
-        generator.generate(self);
-        self.generate_tree();
+        generator.generate(self, screen, animate);
+        self.generate_graph();
     }
 
-    pub fn draw<W: Write>(&self, screen: &mut W, show_graph: bool) {
+    pub fn draw(&self, screen: &mut dyn Write, show_graph: bool) {
         draw_maze(screen, self, show_graph);
     }
 
-    pub fn erase<W: Write>(&self, screen: &mut W) {
+    pub fn erase(&self, screen: &mut dyn Write) {
         erase_maze(screen, self);
     }
 
-    pub fn generate_tree(&mut self) {
+    pub fn generate_graph(&mut self) {
         for (row, data_row) in self.data.iter().enumerate() {
             for (col, datum) in data_row.iter().enumerate() {
                 if datum == &false {

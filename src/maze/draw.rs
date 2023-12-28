@@ -1,8 +1,8 @@
 use crate::maze::maze::Maze;
 use std::io::Write;
 
-const SYMBOL_MAZE_FIELD_ACCESSIBLE: char = ' ';
-const SYMBOL_MAZE_FIELD_BLOCKED: char = '█';
+pub const SYMBOL_MAZE_FIELD_ACCESSIBLE: char = ' ';
+pub const SYMBOL_MAZE_FIELD_BLOCKED: char = '█';
 const SYMBOL_MAZE_ERASED: char = ' ';
 
 const SYMBOL_MAZE_GRAPH_NODE: char = '◉';
@@ -45,7 +45,7 @@ fn calculate_maze_position(maze: &Maze) -> (u16, u16) {
     );
 }
 
-pub fn erase_maze<W: Write>(screen: &mut W, maze: &Maze) {
+pub fn erase_maze(screen: &mut dyn Write, maze: &Maze) {
     let (maze_pos_x, maze_pos_y) = calculate_maze_position(maze);
     for row in 0..maze.height {
         write!(
@@ -60,7 +60,7 @@ pub fn erase_maze<W: Write>(screen: &mut W, maze: &Maze) {
     }
 }
 
-pub fn draw_maze<W: Write>(screen: &mut W, maze: &Maze, show_graph: bool) {
+pub fn draw_maze(screen: &mut dyn Write, maze: &Maze, show_graph: bool) {
     erase_maze(screen, maze);
     let (maze_pos_x, maze_pos_y) = calculate_maze_position(maze);
     for row in 0..maze.height {
@@ -90,7 +90,7 @@ pub fn draw_maze<W: Write>(screen: &mut W, maze: &Maze, show_graph: bool) {
     screen.flush().unwrap();
 }
 
-pub fn draw_character<W: Write>(screen: &mut W, maze: &Maze, pos: (u16, u16), character: char) {
+pub fn draw_character(screen: &mut dyn Write, maze: &Maze, pos: (u16, u16), character: char) {
     let (maze_pos_x, maze_pos_y) = calculate_maze_position(maze);
     write!(
         screen,
@@ -140,7 +140,7 @@ fn complete_path(path: Vec<(u16, u16)>) -> Vec<(u16, u16)> {
         .collect()
 }
 
-pub fn draw_path<W: Write>(screen: &mut W, maze: &Maze, path: Vec<(u16, u16)>) {
+pub fn draw_path(screen: &mut dyn Write, maze: &Maze, path: Vec<(u16, u16)>) {
     let path = complete_path(path);
     path.iter().enumerate().for_each(|(idx, pos)| {
         let pos_prev = if idx > 0 { path[idx - 1] } else { *pos };

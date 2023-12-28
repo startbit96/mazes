@@ -1,13 +1,18 @@
-use crate::maze::generator::MazeGenerator;
+use crate::maze::animation::delay;
+use crate::maze::draw::{draw_character, SYMBOL_MAZE_FIELD_ACCESSIBLE};
+use crate::maze::generator::{MazeGenerator, GENERATION_DELAY};
 use crate::maze::maze::Maze;
-
 use rand::seq::SliceRandom;
 use rand::thread_rng;
+use std::io::Write;
 
 pub struct Kruskal;
 
 impl MazeGenerator for Kruskal {
-    fn generate(&self, maze: &mut Maze) {
+    fn generate(&self, maze: &mut Maze, screen: &mut dyn Write, animate: bool) {
+        // Draw the maze as empty as it is.
+        maze.draw(screen, false);
+
         let mut forest: Vec<Vec<(usize, usize)>> = vec![];
 
         // Fill the forest with small trees. Each tree contains at the
@@ -16,6 +21,16 @@ impl MazeGenerator for Kruskal {
             for col in (1..maze.width - 1).step_by(2) {
                 forest.push(vec![(row, col)]);
                 maze.data[row][col] = true;
+                if animate {
+                    draw_character(
+                        screen,
+                        maze,
+                        (col as u16, row as u16),
+                        SYMBOL_MAZE_FIELD_ACCESSIBLE,
+                    );
+                    delay(GENERATION_DELAY);
+                    screen.flush().unwrap();
+                }
             }
         }
 
@@ -101,6 +116,16 @@ impl MazeGenerator for Kruskal {
                 forest.remove(tree1);
                 forest.push(new_tree);
                 maze.data[ce_row][ce_col] = true;
+                if animate {
+                    draw_character(
+                        screen,
+                        maze,
+                        (ce_col as u16, ce_row as u16),
+                        SYMBOL_MAZE_FIELD_ACCESSIBLE,
+                    );
+                    delay(GENERATION_DELAY);
+                    screen.flush().unwrap();
+                }
             }
         }
     }

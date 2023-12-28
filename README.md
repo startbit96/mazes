@@ -8,6 +8,16 @@ Maze-generation and maze-solving written in Rust.
 
 ### Implemented maze-solving algorithms.
 
+## Key bindings.
+
+| Key | Functionality |  
+| :---:   | :---: |  
+| `r` | re-create the maze |  
+| `k` or `↑` | increase size of the maze |  
+| `j` or `↓` | decrease size of the maze |  
+| `g` | toggle graph visualization on / off |  
+| `a` | toggle animation on / off |  
+
 ## Notes.
 
 In order to make the visualization of the mazes more appealing, change the size of the cells in your terminal so they are square. In kitty you can change this using the [modify_font setting](https://sw.kovidgoyal.net/kitty/conf/#opt-kitty.modify_font).
