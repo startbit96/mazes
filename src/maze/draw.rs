@@ -28,7 +28,7 @@ enum PathOrientation {
 }
 
 impl PathOrientation {
-    fn from_points(pos1: (u16, u16), pos2: (u16, u16)) -> Self {
+    fn from_points(pos1: (usize, usize), pos2: (usize, usize)) -> Self {
         match (pos1.0 == pos2.0, pos1.1 == pos2.1) {
             (true, false) => PathOrientation::Vertical,
             (false, true) => PathOrientation::Horizontal,
@@ -90,24 +90,95 @@ pub fn draw_maze(screen: &mut dyn Write, maze: &Maze, show_graph: bool) {
     screen.flush().unwrap();
 }
 
-pub fn draw_character(screen: &mut dyn Write, maze: &Maze, pos: (u16, u16), character: char) {
+pub fn show_binary_representation(screen: &mut dyn Write, maze: &Maze) {
+    erase_maze(screen, maze);
+    let (maze_pos_x, maze_pos_y) = calculate_maze_position(maze);
+    for row in 0..maze.height {
+        write!(
+            screen,
+            "{}{}",
+            termion::cursor::Goto(maze_pos_x, maze_pos_y + row as u16),
+            maze.data[row]
+                .iter()
+                .map(|is_accessible| match is_accessible {
+                    true => format!(
+                        "{}{}1",
+                        termion::color::Fg(termion::color::Black),
+                        termion::color::Bg(termion::color::White)
+                    ),
+                    false => format!(
+                        "{}{}0",
+                        termion::color::Fg(termion::color::White),
+                        termion::color::Bg(termion::color::Black)
+                    ),
+                })
+                .collect::<String>()
+        )
+        .unwrap();
+    }
+    write!(
+        screen,
+        "{}{}",
+        termion::color::Fg(termion::color::Reset),
+        termion::color::Bg(termion::color::Reset)
+    )
+    .unwrap();
+    screen.flush().unwrap();
+}
+
+pub fn highlight_cell(screen: &mut dyn Write, maze: &Maze, pos: (usize, usize)) {
+    let (maze_pos_x, maze_pos_y) = calculate_maze_position(maze);
+    write!(
+        screen,
+        "{}{}{}{}",
+        termion::cursor::Goto(maze_pos_x + pos.0 as u16, maze_pos_y + pos.1 as u16),
+        termion::color::Bg(termion::color::LightGreen),
+        SYMBOL_MAZE_FIELD_ACCESSIBLE,
+        termion::color::Bg(termion::color::Reset),
+    )
+    .unwrap();
+    screen.flush().unwrap();
+}
+
+pub fn highlight_cells_by_rgb_color(
+    screen: &mut dyn Write,
+    maze: &Maze,
+    pos: Vec<(usize, usize)>,
+    color: (u8, u8, u8),
+) {
+    let (maze_pos_x, maze_pos_y) = calculate_maze_position(maze);
+    for (y, x) in pos.iter() {
+        write!(
+            screen,
+            "{}{}{}{}",
+            termion::cursor::Goto(maze_pos_x + *x as u16, maze_pos_y + *y as u16),
+            termion::color::Bg(termion::color::Rgb(color.0, color.1, color.2)),
+            SYMBOL_MAZE_FIELD_ACCESSIBLE,
+            termion::color::Bg(termion::color::Reset),
+        )
+        .unwrap();
+    }
+    screen.flush().unwrap();
+}
+
+pub fn draw_character(screen: &mut dyn Write, maze: &Maze, pos: (usize, usize), character: char) {
     let (maze_pos_x, maze_pos_y) = calculate_maze_position(maze);
     write!(
         screen,
         "{}{}",
-        termion::cursor::Goto(maze_pos_x + pos.0, maze_pos_y + pos.1),
+        termion::cursor::Goto(maze_pos_x + pos.0 as u16, maze_pos_y + pos.1 as u16),
         character
     )
     .unwrap();
 }
 
-fn complete_line(pos_from: (u16, u16), pos_to: (u16, u16)) -> Vec<(u16, u16)> {
+fn complete_line(pos_from: (usize, usize), pos_to: (usize, usize)) -> Vec<(usize, usize)> {
     let orientation = PathOrientation::from_points(pos_from, pos_to);
     match orientation {
         PathOrientation::Vertical => {
             let mut line = (pos_from.1.min(pos_to.1)..=pos_from.1.max(pos_to.1))
                 .map(|y| (pos_from.0, y))
-                .collect::<Vec<(u16, u16)>>();
+                .collect::<Vec<(usize, usize)>>();
             if pos_from.1 > pos_to.1 {
                 line.reverse();
             }
@@ -116,7 +187,7 @@ fn complete_line(pos_from: (u16, u16), pos_to: (u16, u16)) -> Vec<(u16, u16)> {
         PathOrientation::Horizontal => {
             let mut line = (pos_from.0.min(pos_to.0)..=pos_from.0.max(pos_to.0))
                 .map(|x| (x, pos_from.1))
-                .collect::<Vec<(u16, u16)>>();
+                .collect::<Vec<(usize, usize)>>();
             if pos_from.0 > pos_to.0 {
                 line.reverse();
             }
@@ -125,7 +196,7 @@ fn complete_line(pos_from: (u16, u16), pos_to: (u16, u16)) -> Vec<(u16, u16)> {
     }
 }
 
-fn complete_path(path: Vec<(u16, u16)>) -> Vec<(u16, u16)> {
+fn complete_path(path: Vec<(usize, usize)>) -> Vec<(usize, usize)> {
     // This function only implements straight lines, if more is needed, Bresenham will be implemented.
     path.windows(2)
         .enumerate()
@@ -140,8 +211,15 @@ fn complete_path(path: Vec<(u16, u16)>) -> Vec<(u16, u16)> {
         .collect()
 }
 
-pub fn draw_path(screen: &mut dyn Write, maze: &Maze, path: Vec<(u16, u16)>) {
+pub fn draw_path(screen: &mut dyn Write, maze: &Maze, path: Vec<(usize, usize)>) {
     let path = complete_path(path);
+    write!(
+        screen,
+        "{}{}",
+        termion::color::Fg(termion::color::Black),
+        termion::color::Bg(termion::color::LightBlue)
+    )
+    .unwrap();
     path.iter().enumerate().for_each(|(idx, pos)| {
         let pos_prev = if idx > 0 { path[idx - 1] } else { *pos };
         let pos_next = if idx < path.len() - 1 {
@@ -154,10 +232,10 @@ pub fn draw_path(screen: &mut dyn Write, maze: &Maze, path: Vec<(u16, u16)>) {
             maze,
             *pos,
             match (
-                pos_prev.0 as i16 - pos.0 as i16,
-                pos_prev.1 as i16 - pos.1 as i16,
-                pos_next.0 as i16 - pos.0 as i16,
-                pos_next.1 as i16 - pos.1 as i16,
+                pos_prev.0 as isize - pos.0 as isize,
+                pos_prev.1 as isize - pos.1 as isize,
+                pos_next.0 as isize - pos.0 as isize,
+                pos_next.1 as isize - pos.1 as isize,
             ) {
                 // single position.
                 (0, 0, 0, 0) => SYMBOL_MAZE_PATH_SINGLE_POSITION,
@@ -196,5 +274,45 @@ pub fn draw_path(screen: &mut dyn Write, maze: &Maze, path: Vec<(u16, u16)>) {
             },
         );
     });
+    write!(
+        screen,
+        "{}{}",
+        termion::color::Fg(termion::color::Reset),
+        termion::color::Bg(termion::color::Reset)
+    )
+    .unwrap();
+
     screen.flush().unwrap();
+}
+
+pub fn get_unique_colors(n: usize) -> Vec<(u8, u8, u8)> {
+    // Returns n unique colors or repeats the unique colors if n is too large.
+    // There is an algorithm to implement this:
+    // https://stackoverflow.com/questions/309149/generate-distinctly-different-rgb-colors-in-graphs
+    // Currently we will just use a list.
+    let colors: Vec<(u8, u8, u8)> = vec![
+        (255, 0, 0),
+        (0, 255, 0),
+        (0, 0, 255),
+        (255, 255, 0),
+        (0, 255, 255),
+        (255, 0, 255),
+        (128, 128, 128),
+        (255, 128, 128),
+        (128, 255, 128),
+        (128, 128, 255),
+        (0, 128, 128),
+        (128, 0, 128),
+        (128, 128, 0),
+        (255, 255, 128),
+        (128, 255, 255),
+        (255, 128, 255),
+        (255, 0, 128),
+        (128, 255, 0),
+        (0, 128, 255),
+        (0, 255, 128),
+        (128, 0, 255),
+        (255, 128, 0),
+    ];
+    colors.iter().cycle().take(n).cloned().collect()
 }

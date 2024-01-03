@@ -1,5 +1,8 @@
 use crate::maze::animation::delay;
-use crate::maze::draw::{draw_character, SYMBOL_MAZE_FIELD_ACCESSIBLE};
+use crate::maze::draw::{
+    draw_character, get_unique_colors, highlight_cell, highlight_cells_by_rgb_color,
+    SYMBOL_MAZE_FIELD_ACCESSIBLE,
+};
 use crate::maze::generator::{MazeGenerator, GENERATION_DELAY};
 use crate::maze::maze::Maze;
 use rand::seq::SliceRandom;
@@ -22,15 +25,24 @@ impl MazeGenerator for Kruskal {
                 forest.push(vec![(row, col)]);
                 maze.data[row][col] = true;
                 if animate {
-                    draw_character(
-                        screen,
-                        maze,
-                        (col as u16, row as u16),
-                        SYMBOL_MAZE_FIELD_ACCESSIBLE,
-                    );
+                    draw_character(screen, maze, (col, row), SYMBOL_MAZE_FIELD_ACCESSIBLE);
                     delay(GENERATION_DELAY);
                     screen.flush().unwrap();
                 }
+            }
+        }
+
+        // Now we have all the trees visualized. Give them all a (almost) unique color.
+        let mut colors = if animate {
+            get_unique_colors(forest.len())
+        } else {
+            Vec::new()
+        };
+        if animate {
+            for (idx, tree) in forest.iter().enumerate() {
+                highlight_cells_by_rgb_color(screen, maze, tree.clone(), colors[idx]);
+                delay(GENERATION_DELAY);
+                screen.flush().unwrap();
             }
         }
 
@@ -112,21 +124,23 @@ impl MazeGenerator for Kruskal {
                 }
                 let mut new_tree = forest[tree1].clone();
                 new_tree.append(&mut forest[tree2].clone());
+                new_tree.push((ce_row, ce_col));
                 forest.remove(tree2);
                 forest.remove(tree1);
-                forest.push(new_tree);
+                forest.push(new_tree.clone());
                 maze.data[ce_row][ce_col] = true;
                 if animate {
-                    draw_character(
-                        screen,
-                        maze,
-                        (ce_col as u16, ce_row as u16),
-                        SYMBOL_MAZE_FIELD_ACCESSIBLE,
-                    );
+                    colors.push(colors[tree2]);
+                    colors.remove(tree2);
+                    colors.remove(tree1);
+                    highlight_cells_by_rgb_color(screen, maze, new_tree, colors[colors.len() - 1]);
                     delay(GENERATION_DELAY);
                     screen.flush().unwrap();
                 }
             }
+        }
+        if animate {
+            delay(GENERATION_DELAY);
         }
     }
 }

@@ -1,3 +1,4 @@
+use maze::draw::show_binary_representation;
 use std::io::{stdin, stdout, Write};
 use termion::event::Key;
 use termion::input::TermRead;
@@ -9,6 +10,10 @@ mod terminal_ui;
 
 use maze::generator::kruskal::Kruskal;
 use maze::maze::Maze;
+use maze::solver::{
+    breadth_first_search::BreadthFirstSearch, depth_first_search::DepthFirstSearch,
+    MazeSolvingAlgorithms,
+};
 
 fn main() {
     // Initialize the alternate screen.
@@ -23,7 +28,11 @@ fn main() {
 
     // To toggle visualization options.
     let mut show_graph: bool = false;
-    let mut animate: bool = true;
+    let mut show_representation: bool = false;
+    let mut animate: bool = false;
+
+    // Selected algorithms.
+    let mut solving_algorithm = MazeSolvingAlgorithms::BreadthFirstSearch;
 
     // Draw terminal ui and the maze.
     terminal_ui::intialize_terminal_ui(&mut screen);
@@ -65,6 +74,30 @@ fn main() {
             Key::Char('a') => {
                 // Toggle animation on / off.
                 animate = !animate;
+            }
+            Key::Char('s') => match solving_algorithm {
+                MazeSolvingAlgorithms::BreadthFirstSearch => {
+                    maze.solve(&BreadthFirstSearch, &mut screen, animate);
+                }
+                MazeSolvingAlgorithms::DepthFirstSearch => {
+                    maze.solve(&DepthFirstSearch, &mut screen, animate);
+                }
+            },
+            Key::Char('l') => {
+                // Next solving algorithm.
+                solving_algorithm = solving_algorithm.next();
+            }
+            Key::Char('c') => {
+                // Redraw the maze (remove the solved path).
+                maze.draw(&mut screen, show_graph);
+            }
+            Key::Char('b') => {
+                show_representation = !show_representation;
+                if show_representation {
+                    show_binary_representation(&mut screen, &maze);
+                } else {
+                    maze.draw(&mut screen, show_graph);
+                }
             }
             _ => {}
         }

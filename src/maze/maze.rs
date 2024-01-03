@@ -1,4 +1,6 @@
-use crate::maze::{draw::*, generator::MazeGenerator};
+use crate::maze::draw::*;
+use crate::maze::generator::MazeGenerator;
+use crate::maze::solver::MazeSolver;
 use std::io::Write;
 
 const MAZE_EDGE_LENGTH_MIN: usize = 11;
@@ -75,6 +77,13 @@ impl Maze {
         return true;
     }
 
+    pub fn is_accessible(&self, pos: (usize, usize)) -> bool {
+        if pos.0 >= self.width || pos.1 >= self.height {
+            panic!();
+        }
+        self.data[pos.1][pos.0]
+    }
+
     fn reset(&mut self) {
         for row in &mut self.data {
             for value in row {
@@ -92,6 +101,11 @@ impl Maze {
         self.reset();
         generator.generate(self, screen, animate);
         self.generate_graph();
+    }
+
+    pub fn solve(&self, solver: &dyn MazeSolver, screen: &mut dyn Write, animate: bool) {
+        self.draw(screen, false);
+        solver.solve(self, screen, animate);
     }
 
     pub fn draw(&self, screen: &mut dyn Write, show_graph: bool) {

@@ -2,7 +2,7 @@ use std::{thread, time::Duration};
 
 const ANIMATION_DELAY_SHORT_MILLISECONDS: u64 = 2;
 const ANIMATION_DELAY_MIDDLE_MILLISECONDS: u64 = 5;
-const ANIMATION_DELAY_LONG_MILLISECONDS: u64 = 10;
+const ANIMATION_DELAY_LONG_MILLISECONDS: u64 = 30;
 
 pub enum Delay {
     NoDelay,
