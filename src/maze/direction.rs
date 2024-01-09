@@ -28,6 +28,25 @@ impl AbsoluteDirection {
         }
     }
 
+    pub fn from_char(c: char) -> Self {
+        match c {
+            'L' | 'l' => AbsoluteDirection::Left,
+            'R' | 'r' => AbsoluteDirection::Right,
+            'U' | 'u' => AbsoluteDirection::Up,
+            'D' | 'd' => AbsoluteDirection::Down,
+            _ => panic!("Unknown direction!"),
+        }
+    }
+
+    pub fn to_char(&self) -> char {
+        match self {
+            AbsoluteDirection::Left => 'L',
+            AbsoluteDirection::Right => 'R',
+            AbsoluteDirection::Up => 'U',
+            AbsoluteDirection::Down => 'D',
+        }
+    }
+
     pub fn rev(&self) -> Self {
         match self {
             AbsoluteDirection::Left => AbsoluteDirection::Right,
@@ -68,15 +87,6 @@ impl AbsoluteDirection {
             AbsoluteDirection::Right => (pos.0 + 1, pos.1),
             AbsoluteDirection::Up => (pos.0, pos.1 - 1),
             AbsoluteDirection::Down => (pos.0, pos.1 + 1),
-        }
-    }
-
-    pub fn to_char(&self) -> char {
-        match self {
-            AbsoluteDirection::Left => 'L',
-            AbsoluteDirection::Right => 'R',
-            AbsoluteDirection::Up => 'U',
-            AbsoluteDirection::Down => 'D',
         }
     }
 }

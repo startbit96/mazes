@@ -1,4 +1,4 @@
-use maze::draw::show_binary_representation;
+use maze::draw::{draw_path, show_binary_representation};
 use maze::generator::GENERATION_DELAY;
 use std::io::{stdin, stdout, Write};
 use termion::event::Key;
@@ -11,7 +11,7 @@ mod terminal_ui;
 
 use maze::generator::kruskal::Kruskal;
 use maze::maze::Maze;
-use maze::path::get_solving_sequence;
+use maze::path::{apply_solving_sequence, get_solving_sequence};
 use maze::solver::{
     breadth_first_search::BreadthFirstSearch, depth_first_search::DepthFirstSearch,
     MazeSolvingAlgorithms,
@@ -111,6 +111,12 @@ fn main() {
                 } else {
                     maze.draw(&mut screen, show_graph);
                 }
+            }
+            Key::Char('w') => {
+                let solving_sequence: Vec<char> =
+                    vec!['d', 'd', 'r', 'r', 'd', 'd', 'l', 'l', 'u', 'u', 'r'];
+                let path = apply_solving_sequence(&maze, (1, 1), solving_sequence);
+                draw_path(&mut screen, &maze, path);
             }
             _ => {}
         }

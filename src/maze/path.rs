@@ -1,4 +1,5 @@
 use crate::maze::direction::AbsoluteDirection;
+use crate::maze::maze::*;
 
 #[derive(Debug, PartialEq, Eq)]
 enum PathOrientation {
@@ -62,4 +63,22 @@ pub fn get_solving_sequence(path: &Vec<(usize, usize)>) -> Vec<char> {
             direction.to_char()
         })
         .collect()
+}
+
+pub fn apply_solving_sequence(
+    maze: &Maze,
+    pos_start: (usize, usize),
+    solving_sequence: Vec<char>,
+) -> Vec<(usize, usize)> {
+    let mut pos = pos_start;
+    let mut path = vec![pos_start];
+    for &c in solving_sequence.iter() {
+        let direction = AbsoluteDirection::from_char(c);
+        let pos_next = direction.apply(pos);
+        if maze.is_accessible(pos_next) {
+            pos = pos_next;
+            path.push(pos_next);
+        }
+    }
+    path
 }
