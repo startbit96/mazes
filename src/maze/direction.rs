@@ -15,6 +15,19 @@ pub enum RelativeDirection {
 }
 
 impl AbsoluteDirection {
+    pub fn from_points(pos_from: (usize, usize), pos_to: (usize, usize)) -> Self {
+        match (
+            pos_to.0 as isize - pos_from.0 as isize,
+            pos_to.1 as isize - pos_from.1 as isize,
+        ) {
+            (-1, 0) => AbsoluteDirection::Left,
+            (1, 0) => AbsoluteDirection::Right,
+            (0, -1) => AbsoluteDirection::Up,
+            (0, 1) => AbsoluteDirection::Down,
+            _ => panic!("Only one step per time is supported."),
+        }
+    }
+
     pub fn rev(&self) -> Self {
         match self {
             AbsoluteDirection::Left => AbsoluteDirection::Right,
@@ -55,6 +68,15 @@ impl AbsoluteDirection {
             AbsoluteDirection::Right => (pos.0 + 1, pos.1),
             AbsoluteDirection::Up => (pos.0, pos.1 - 1),
             AbsoluteDirection::Down => (pos.0, pos.1 + 1),
+        }
+    }
+
+    pub fn to_char(&self) -> char {
+        match self {
+            AbsoluteDirection::Left => 'L',
+            AbsoluteDirection::Right => 'R',
+            AbsoluteDirection::Up => 'U',
+            AbsoluteDirection::Down => 'D',
         }
     }
 }

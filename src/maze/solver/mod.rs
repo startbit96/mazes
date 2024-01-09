@@ -10,7 +10,7 @@ pub mod breadth_first_search;
 pub mod depth_first_search;
 
 pub trait MazeSolver {
-    fn solve(&self, maze: &Maze, screen: &mut dyn Write, animate: bool);
+    fn solve(&self, maze: &Maze, screen: &mut dyn Write, animate: bool) -> Vec<(usize, usize)>;
 }
 
 #[derive(Debug)]

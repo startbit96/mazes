@@ -8,7 +8,12 @@ use std::collections::VecDeque;
 pub struct DepthFirstSearch;
 
 impl MazeSolver for DepthFirstSearch {
-    fn solve(&self, maze: &Maze, screen: &mut dyn std::io::Write, animate: bool) {
+    fn solve(
+        &self,
+        maze: &Maze,
+        screen: &mut dyn std::io::Write,
+        animate: bool,
+    ) -> Vec<(usize, usize)> {
         let pos_start = (1, 1);
         let pos_end = (maze.width - 2, maze.height - 2);
         let mut queue: VecDeque<((usize, usize), AbsoluteDirection, Vec<(usize, usize)>)> =
@@ -20,8 +25,8 @@ impl MazeSolver for DepthFirstSearch {
             let (pos, direction, path) = queue.pop_front().unwrap();
             highlight_cell(screen, maze, pos);
             if pos == pos_end {
-                draw_path(screen, maze, path);
-                break;
+                draw_path(screen, maze, path.clone());
+                return path;
             }
             if animate {
                 delay(SOLVING_DELAY);
@@ -44,5 +49,6 @@ impl MazeSolver for DepthFirstSearch {
                 }
             }
         }
+        panic!()
     }
 }

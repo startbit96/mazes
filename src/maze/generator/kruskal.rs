@@ -41,9 +41,9 @@ impl MazeGenerator for Kruskal {
         if animate {
             for (idx, tree) in forest.iter().enumerate() {
                 highlight_cells_by_rgb_color(screen, maze, tree.clone(), colors[idx]);
-                delay(GENERATION_DELAY);
-                screen.flush().unwrap();
             }
+            screen.flush().unwrap();
+            delay(GENERATION_DELAY);
         }
 
         // Get all possible edges. We will not use all but only that much

@@ -1,4 +1,5 @@
 use maze::draw::show_binary_representation;
+use maze::generator::GENERATION_DELAY;
 use std::io::{stdin, stdout, Write};
 use termion::event::Key;
 use termion::input::TermRead;
@@ -10,6 +11,7 @@ mod terminal_ui;
 
 use maze::generator::kruskal::Kruskal;
 use maze::maze::Maze;
+use maze::path::get_solving_sequence;
 use maze::solver::{
     breadth_first_search::BreadthFirstSearch, depth_first_search::DepthFirstSearch,
     MazeSolvingAlgorithms,
@@ -75,14 +77,25 @@ fn main() {
                 // Toggle animation on / off.
                 animate = !animate;
             }
-            Key::Char('s') => match solving_algorithm {
-                MazeSolvingAlgorithms::BreadthFirstSearch => {
-                    maze.solve(&BreadthFirstSearch, &mut screen, animate);
-                }
-                MazeSolvingAlgorithms::DepthFirstSearch => {
-                    maze.solve(&DepthFirstSearch, &mut screen, animate);
-                }
-            },
+            Key::Char('s') => {
+                let path = match solving_algorithm {
+                    MazeSolvingAlgorithms::BreadthFirstSearch => {
+                        maze.solve(&BreadthFirstSearch, &mut screen, animate)
+                    }
+                    MazeSolvingAlgorithms::DepthFirstSearch => {
+                        maze.solve(&DepthFirstSearch, &mut screen, animate)
+                    }
+                };
+                let solving_sequence = get_solving_sequence(&path);
+                let solving_sequence: String = solving_sequence.iter().collect();
+                write!(
+                    screen,
+                    "{}{:?}",
+                    termion::cursor::Goto(5, 5),
+                    solving_sequence
+                )
+                .unwrap();
+            }
             Key::Char('l') => {
                 // Next solving algorithm.
                 solving_algorithm = solving_algorithm.next();

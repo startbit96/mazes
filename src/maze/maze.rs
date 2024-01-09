@@ -103,9 +103,14 @@ impl Maze {
         self.generate_graph();
     }
 
-    pub fn solve(&self, solver: &dyn MazeSolver, screen: &mut dyn Write, animate: bool) {
+    pub fn solve(
+        &self,
+        solver: &dyn MazeSolver,
+        screen: &mut dyn Write,
+        animate: bool,
+    ) -> Vec<(usize, usize)> {
         self.draw(screen, false);
-        solver.solve(self, screen, animate);
+        solver.solve(self, screen, animate)
     }
 
     pub fn draw(&self, screen: &mut dyn Write, show_graph: bool) {
