@@ -8,6 +8,9 @@ const MAZE_DEFAULT_WIDTH: usize = 21;
 const MAZE_DEFAULT_HEIGHT: usize = 21;
 const FORCE_SQUARE_MAZES: bool = true;
 
+pub const MAZE_VALUE_ACCESSIBLE: bool = false;
+pub const MAZE_VALUE_BLOCKED: bool = true;
+
 pub struct Maze {
     pub width: usize,
     pub height: usize,
@@ -72,7 +75,7 @@ impl Maze {
         }
         self.width = width;
         self.height = height;
-        self.data = vec![vec![false; width]; height];
+        self.data = vec![vec![MAZE_VALUE_BLOCKED; width]; height];
         self.is_node = vec![vec![false; width]; height];
         return true;
     }
@@ -81,13 +84,20 @@ impl Maze {
         if pos.0 >= self.width || pos.1 >= self.height {
             panic!();
         }
-        self.data[pos.1][pos.0]
+        self.data[pos.1][pos.0] == MAZE_VALUE_ACCESSIBLE
+    }
+
+    pub fn is_blocked(&self, pos: (usize, usize)) -> bool {
+        if pos.0 >= self.width || pos.1 >= self.height {
+            panic!();
+        }
+        self.data[pos.1][pos.0] == MAZE_VALUE_BLOCKED
     }
 
     fn reset(&mut self) {
         for row in &mut self.data {
             for value in row {
-                *value = false;
+                *value = MAZE_VALUE_BLOCKED;
             }
         }
     }
@@ -123,8 +133,8 @@ impl Maze {
 
     pub fn generate_graph(&mut self) {
         for (row, data_row) in self.data.iter().enumerate() {
-            for (col, datum) in data_row.iter().enumerate() {
-                if datum == &false {
+            for (col, &datum) in data_row.iter().enumerate() {
+                if datum == MAZE_VALUE_BLOCKED {
                     self.is_node[row][col] = false;
                 } else {
                     self.is_node[row][col] = match (
@@ -135,21 +145,86 @@ impl Maze {
                     ) {
                         // (left, right, up, down)
                         // curve.
-                        (false, true, false, true) => true,
-                        (true, false, false, true) => true,
-                        (false, true, true, false) => true,
-                        (true, false, true, false) => true,
+                        (
+                            MAZE_VALUE_BLOCKED,
+                            MAZE_VALUE_ACCESSIBLE,
+                            MAZE_VALUE_BLOCKED,
+                            MAZE_VALUE_ACCESSIBLE,
+                        ) => true,
+                        (
+                            MAZE_VALUE_ACCESSIBLE,
+                            MAZE_VALUE_BLOCKED,
+                            MAZE_VALUE_BLOCKED,
+                            MAZE_VALUE_ACCESSIBLE,
+                        ) => true,
+                        (
+                            MAZE_VALUE_BLOCKED,
+                            MAZE_VALUE_ACCESSIBLE,
+                            MAZE_VALUE_ACCESSIBLE,
+                            MAZE_VALUE_BLOCKED,
+                        ) => true,
+                        (
+                            MAZE_VALUE_ACCESSIBLE,
+                            MAZE_VALUE_BLOCKED,
+                            MAZE_VALUE_ACCESSIBLE,
+                            MAZE_VALUE_BLOCKED,
+                        ) => true,
                         // dead end.
-                        (false, false, false, true) => true,
-                        (false, false, true, false) => true,
-                        (false, true, false, false) => true,
-                        (true, false, false, false) => true,
+                        (
+                            MAZE_VALUE_BLOCKED,
+                            MAZE_VALUE_BLOCKED,
+                            MAZE_VALUE_BLOCKED,
+                            MAZE_VALUE_ACCESSIBLE,
+                        ) => true,
+                        (
+                            MAZE_VALUE_BLOCKED,
+                            MAZE_VALUE_BLOCKED,
+                            MAZE_VALUE_ACCESSIBLE,
+                            MAZE_VALUE_BLOCKED,
+                        ) => true,
+                        (
+                            MAZE_VALUE_BLOCKED,
+                            MAZE_VALUE_ACCESSIBLE,
+                            MAZE_VALUE_BLOCKED,
+                            MAZE_VALUE_BLOCKED,
+                        ) => true,
+                        (
+                            MAZE_VALUE_ACCESSIBLE,
+                            MAZE_VALUE_BLOCKED,
+                            MAZE_VALUE_BLOCKED,
+                            MAZE_VALUE_BLOCKED,
+                        ) => true,
                         // crossway.
-                        (true, true, true, false) => true,
-                        (true, true, false, true) => true,
-                        (true, false, true, true) => true,
-                        (false, true, true, true) => true,
-                        (true, true, true, true) => true,
+                        (
+                            MAZE_VALUE_ACCESSIBLE,
+                            MAZE_VALUE_ACCESSIBLE,
+                            MAZE_VALUE_ACCESSIBLE,
+                            MAZE_VALUE_BLOCKED,
+                        ) => true,
+                        (
+                            MAZE_VALUE_ACCESSIBLE,
+                            MAZE_VALUE_ACCESSIBLE,
+                            MAZE_VALUE_BLOCKED,
+                            MAZE_VALUE_ACCESSIBLE,
+                        ) => true,
+                        (
+                            MAZE_VALUE_ACCESSIBLE,
+                            MAZE_VALUE_BLOCKED,
+                            MAZE_VALUE_ACCESSIBLE,
+                            MAZE_VALUE_ACCESSIBLE,
+                        ) => true,
+                        (
+                            MAZE_VALUE_BLOCKED,
+                            MAZE_VALUE_ACCESSIBLE,
+                            MAZE_VALUE_ACCESSIBLE,
+                            MAZE_VALUE_ACCESSIBLE,
+                        ) => true,
+                        (
+                            MAZE_VALUE_ACCESSIBLE,
+                            MAZE_VALUE_ACCESSIBLE,
+                            MAZE_VALUE_ACCESSIBLE,
+                            MAZE_VALUE_ACCESSIBLE,
+                        ) => true,
                         _ => false,
                     };
                 }

@@ -1,4 +1,4 @@
-use crate::maze::maze::Maze;
+use crate::maze::maze::*;
 use crate::maze::path::*;
 use std::io::Write;
 
@@ -57,17 +57,17 @@ pub fn draw_maze(screen: &mut dyn Write, maze: &Maze, show_graph: bool) {
                 .iter()
                 .zip(maze.is_node[row].iter())
                 .enumerate()
-                .map(
-                    |(col, (is_accessible, is_node))| match (is_accessible, is_node, show_graph) {
-                        (false, _, _) => SYMBOL_MAZE_FIELD_BLOCKED,
-                        (true, _, false) => SYMBOL_MAZE_FIELD_ACCESSIBLE,
-                        (true, true, true) => SYMBOL_MAZE_GRAPH_NODE,
-                        (true, false, true) => match maze.data[row][col - 1] {
-                            true => SYMBOL_MAZE_GRAPH_CONNECTION_HORIZONTAL,
-                            false => SYMBOL_MAZE_GRAPH_CONNECTION_VERTICAL,
+                .map(|(col, (&is_accessible, &is_node))| {
+                    match (is_accessible, is_node, show_graph) {
+                        (MAZE_VALUE_BLOCKED, _, _) => SYMBOL_MAZE_FIELD_BLOCKED,
+                        (MAZE_VALUE_ACCESSIBLE, _, false) => SYMBOL_MAZE_FIELD_ACCESSIBLE,
+                        (MAZE_VALUE_ACCESSIBLE, true, true) => SYMBOL_MAZE_GRAPH_NODE,
+                        (MAZE_VALUE_ACCESSIBLE, false, true) => match maze.data[row][col - 1] {
+                            MAZE_VALUE_ACCESSIBLE => SYMBOL_MAZE_GRAPH_CONNECTION_HORIZONTAL,
+                            MAZE_VALUE_BLOCKED => SYMBOL_MAZE_GRAPH_CONNECTION_VERTICAL,
                         },
                     }
-                )
+                })
                 .collect::<String>()
         )
         .unwrap();

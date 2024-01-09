@@ -4,7 +4,7 @@ use crate::maze::draw::{
     SYMBOL_MAZE_FIELD_ACCESSIBLE,
 };
 use crate::maze::generator::{MazeGenerator, GENERATION_DELAY};
-use crate::maze::maze::Maze;
+use crate::maze::maze::*;
 use rand::seq::SliceRandom;
 use rand::thread_rng;
 use std::io::Write;
@@ -23,7 +23,7 @@ impl MazeGenerator for Kruskal {
         for row in (1..maze.height - 1).step_by(2) {
             for col in (1..maze.width - 1).step_by(2) {
                 forest.push(vec![(row, col)]);
-                maze.data[row][col] = true;
+                maze.data[row][col] = MAZE_VALUE_ACCESSIBLE;
                 if animate {
                     draw_character(screen, maze, (col, row), SYMBOL_MAZE_FIELD_ACCESSIBLE);
                     delay(GENERATION_DELAY);
@@ -128,7 +128,7 @@ impl MazeGenerator for Kruskal {
                 forest.remove(tree2);
                 forest.remove(tree1);
                 forest.push(new_tree.clone());
-                maze.data[ce_row][ce_col] = true;
+                maze.data[ce_row][ce_col] = MAZE_VALUE_ACCESSIBLE;
                 if animate {
                     colors.push(colors[tree2]);
                     colors.remove(tree2);
