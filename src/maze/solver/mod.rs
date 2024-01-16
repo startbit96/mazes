@@ -2,12 +2,11 @@ use crate::maze::animation::Delay;
 use crate::maze::maze::Maze;
 use std::io::Write;
 
-use self::breadth_first_search::BreadthFirstSearch;
-
-pub const SOLVING_DELAY: Delay = Delay::Short;
+pub const SOLVING_DELAY: Delay = Delay::Long;
 
 pub mod breadth_first_search;
 pub mod depth_first_search;
+pub mod wall_follower;
 
 pub trait MazeSolver {
     fn solve(&self, maze: &Maze, screen: &mut dyn Write, animate: bool) -> Vec<(usize, usize)>;
@@ -17,13 +16,15 @@ pub trait MazeSolver {
 pub enum MazeSolvingAlgorithms {
     BreadthFirstSearch,
     DepthFirstSearch,
+    WallFollower,
 }
 
 impl MazeSolvingAlgorithms {
     pub fn next(&self) -> Self {
         match self {
             Self::BreadthFirstSearch => Self::DepthFirstSearch,
-            Self::DepthFirstSearch => Self::BreadthFirstSearch,
+            Self::DepthFirstSearch => Self::WallFollower,
+            Self::WallFollower => Self::BreadthFirstSearch,
         }
     }
 }

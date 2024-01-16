@@ -3,12 +3,14 @@ use std::{thread, time::Duration};
 const ANIMATION_DELAY_SHORT_MILLISECONDS: u64 = 2;
 const ANIMATION_DELAY_MIDDLE_MILLISECONDS: u64 = 5;
 const ANIMATION_DELAY_LONG_MILLISECONDS: u64 = 30;
+const ANIMATION_DELAY_VERY_LONG_MILLISECONDS: u64 = 50;
 
 pub enum Delay {
     NoDelay,
     Short,
     Middle,
     Long,
+    VeryLong,
 }
 
 impl Delay {
@@ -18,6 +20,7 @@ impl Delay {
             Delay::Short => ANIMATION_DELAY_SHORT_MILLISECONDS,
             Delay::Middle => ANIMATION_DELAY_MIDDLE_MILLISECONDS,
             Delay::Long => ANIMATION_DELAY_LONG_MILLISECONDS,
+            Delay::VeryLong => ANIMATION_DELAY_VERY_LONG_MILLISECONDS,
         }
     }
 }

@@ -14,7 +14,7 @@ use maze::maze::Maze;
 use maze::path::{apply_solving_sequence, get_solving_sequence};
 use maze::solver::{
     breadth_first_search::BreadthFirstSearch, depth_first_search::DepthFirstSearch,
-    MazeSolvingAlgorithms,
+    wall_follower::WallFollower, MazeSolvingAlgorithms,
 };
 
 fn main() {
@@ -78,14 +78,16 @@ fn main() {
                 animate = !animate;
             }
             Key::Char('s') => {
-                let path = match solving_algorithm {
-                    MazeSolvingAlgorithms::BreadthFirstSearch => {
-                        maze.solve(&BreadthFirstSearch, &mut screen, animate)
-                    }
-                    MazeSolvingAlgorithms::DepthFirstSearch => {
-                        maze.solve(&DepthFirstSearch, &mut screen, animate)
-                    }
-                };
+                let path = maze.solve(
+                    match solving_algorithm {
+                        MazeSolvingAlgorithms::BreadthFirstSearch => &BreadthFirstSearch,
+
+                        MazeSolvingAlgorithms::DepthFirstSearch => &DepthFirstSearch,
+                        MazeSolvingAlgorithms::WallFollower => &WallFollower,
+                    },
+                    &mut screen,
+                    animate,
+                );
                 let solving_sequence = get_solving_sequence(&path);
                 let solving_sequence: String = solving_sequence.iter().collect();
                 write!(

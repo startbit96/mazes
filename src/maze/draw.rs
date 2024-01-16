@@ -146,8 +146,17 @@ pub fn highlight_cells_by_rgb_color(
     screen.flush().unwrap();
 }
 
-pub fn draw_character(screen: &mut dyn Write, maze: &Maze, pos: (usize, usize), character: char) {
+pub fn draw_character(
+    screen: &mut dyn Write,
+    maze: &Maze,
+    pos: (usize, usize),
+    character: char,
+    highlight: bool,
+) {
     let (maze_pos_x, maze_pos_y) = calculate_maze_position(maze);
+    if highlight {
+        write!(screen, "{}", termion::color::Bg(termion::color::LightGreen)).unwrap();
+    }
     write!(
         screen,
         "{}{}",
@@ -155,6 +164,10 @@ pub fn draw_character(screen: &mut dyn Write, maze: &Maze, pos: (usize, usize), 
         character
     )
     .unwrap();
+    if highlight {
+        write!(screen, "{}", termion::color::Bg(termion::color::Reset)).unwrap();
+    }
+    screen.flush().unwrap();
 }
 
 pub fn draw_path(screen: &mut dyn Write, maze: &Maze, path: Vec<(usize, usize)>) {
@@ -218,6 +231,7 @@ pub fn draw_path(screen: &mut dyn Write, maze: &Maze, path: Vec<(usize, usize)>)
                 // hopefully I forgot nothing.
                 _ => '?',
             },
+            false,
         );
     });
     write!(

@@ -47,6 +47,15 @@ impl AbsoluteDirection {
         }
     }
 
+    pub fn to_symbol(&self) -> char {
+        match self {
+            AbsoluteDirection::Left => '◀',
+            AbsoluteDirection::Right => '▶',
+            AbsoluteDirection::Up => '▲',
+            AbsoluteDirection::Down => '▼',
+        }
+    }
+
     pub fn rev(&self) -> Self {
         match self {
             AbsoluteDirection::Left => AbsoluteDirection::Right,
