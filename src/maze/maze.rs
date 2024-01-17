@@ -45,7 +45,7 @@ impl Maze {
             height,
             max_width,
             max_height,
-            data: vec![vec![false; height]; height],
+            data: vec![vec![MAZE_VALUE_BLOCKED; height]; height],
             is_node: vec![vec![false; width]; height],
         }
     }

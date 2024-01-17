@@ -1,5 +1,5 @@
 use maze::draw::{draw_path, show_binary_representation};
-use maze::generator::GENERATION_DELAY;
+use maze::generator::{MazeGenerator, GENERATION_DELAY};
 use std::io::{stdin, stdout, Write};
 use termion::event::Key;
 use termion::input::TermRead;
@@ -9,7 +9,9 @@ use termion::screen::{IntoAlternateScreen, ToAlternateScreen};
 mod maze;
 mod terminal_ui;
 
-use maze::generator::kruskal::Kruskal;
+use maze::generator::{
+    kruskal::Kruskal, recursive_backtracking::RecursiveBacktracking, MazeGenerationAlgorithms,
+};
 use maze::maze::Maze;
 use maze::path::{apply_solving_sequence, get_solving_sequence};
 use maze::solver::{
@@ -34,13 +36,21 @@ fn main() {
     let mut animate: bool = false;
 
     // Selected algorithms.
+    let mut generation_algorithm = MazeGenerationAlgorithms::Kruskal;
     let mut solving_algorithm = MazeSolvingAlgorithms::BreadthFirstSearch;
 
     // Draw terminal ui and the maze.
     terminal_ui::intialize_terminal_ui(&mut screen);
     let (max_maze_width, max_maze_height) = terminal_ui::get_max_draw_size();
     let mut maze = Maze::new(max_maze_width, max_maze_height);
-    maze.generate(&Kruskal, &mut screen, animate);
+    maze.generate(
+        match generation_algorithm {
+            MazeGenerationAlgorithms::Kruskal => &Kruskal,
+            MazeGenerationAlgorithms::RecursiveBacktracking => &RecursiveBacktracking,
+        },
+        &mut screen,
+        animate,
+    );
     maze.draw(&mut screen, show_graph);
 
     // The main loop that keeps the program alive. q breaks it.
@@ -50,13 +60,29 @@ fn main() {
             Key::Char('q') => break,
             Key::Char('r') => {
                 // Recreate.
-                maze.generate(&Kruskal, &mut screen, animate);
+                maze.generate(
+                    match generation_algorithm {
+                        MazeGenerationAlgorithms::Kruskal => &Kruskal,
+                        MazeGenerationAlgorithms::RecursiveBacktracking => &RecursiveBacktracking,
+                    },
+                    &mut screen,
+                    animate,
+                );
                 maze.draw(&mut screen, show_graph);
             }
             Key::Up | Key::Char('k') => {
                 // Increase size.
                 if maze.change_size(maze.width + 2, maze.height + 2) {
-                    maze.generate(&Kruskal, &mut screen, animate);
+                    maze.generate(
+                        match generation_algorithm {
+                            MazeGenerationAlgorithms::Kruskal => &Kruskal,
+                            MazeGenerationAlgorithms::RecursiveBacktracking => {
+                                &RecursiveBacktracking
+                            }
+                        },
+                        &mut screen,
+                        animate,
+                    );
                     maze.draw(&mut screen, show_graph);
                 }
             }
@@ -64,7 +90,16 @@ fn main() {
                 // Decrease size.
                 if maze.change_size(maze.width - 2, maze.height - 2) {
                     terminal_ui::erase_draw_area(&mut screen);
-                    maze.generate(&Kruskal, &mut screen, animate);
+                    maze.generate(
+                        match generation_algorithm {
+                            MazeGenerationAlgorithms::Kruskal => &Kruskal,
+                            MazeGenerationAlgorithms::RecursiveBacktracking => {
+                                &RecursiveBacktracking
+                            }
+                        },
+                        &mut screen,
+                        animate,
+                    );
                     maze.draw(&mut screen, show_graph);
                 }
             }
@@ -97,6 +132,10 @@ fn main() {
                     solving_sequence
                 )
                 .unwrap();
+            }
+            Key::Char('h') => {
+                // Next generation algorithm.
+                generation_algorithm = generation_algorithm.next();
             }
             Key::Char('l') => {
                 // Next solving algorithm.

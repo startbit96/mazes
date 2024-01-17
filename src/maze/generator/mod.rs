@@ -4,8 +4,24 @@ use std::io::Write;
 
 pub const GENERATION_DELAY: Delay = Delay::Middle;
 
+pub mod kruskal;
+pub mod recursive_backtracking;
+
 pub trait MazeGenerator {
     fn generate(&self, maze: &mut Maze, screen: &mut dyn Write, animate: bool);
 }
 
-pub mod kruskal;
+#[derive(Debug)]
+pub enum MazeGenerationAlgorithms {
+    Kruskal,
+    RecursiveBacktracking,
+}
+
+impl MazeGenerationAlgorithms {
+    pub fn next(&self) -> Self {
+        match self {
+            Self::Kruskal => Self::RecursiveBacktracking,
+            Self::RecursiveBacktracking => Self::Kruskal,
+        }
+    }
+}
