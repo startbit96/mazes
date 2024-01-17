@@ -10,7 +10,8 @@ mod maze;
 mod terminal_ui;
 
 use maze::generator::{
-    kruskal::Kruskal, recursive_backtracking::RecursiveBacktracking, MazeGenerationAlgorithms,
+    kruskal::Kruskal, recursive_backtracking::RecursiveBacktracking, wilson::Wilson,
+    MazeGenerationAlgorithms,
 };
 use maze::maze::Maze;
 use maze::path::{apply_solving_sequence, get_solving_sequence};
@@ -47,6 +48,7 @@ fn main() {
         match generation_algorithm {
             MazeGenerationAlgorithms::Kruskal => &Kruskal,
             MazeGenerationAlgorithms::RecursiveBacktracking => &RecursiveBacktracking,
+            MazeGenerationAlgorithms::Wilson => &Wilson,
         },
         &mut screen,
         animate,
@@ -64,6 +66,7 @@ fn main() {
                     match generation_algorithm {
                         MazeGenerationAlgorithms::Kruskal => &Kruskal,
                         MazeGenerationAlgorithms::RecursiveBacktracking => &RecursiveBacktracking,
+                        MazeGenerationAlgorithms::Wilson => &Wilson,
                     },
                     &mut screen,
                     animate,
@@ -79,6 +82,7 @@ fn main() {
                             MazeGenerationAlgorithms::RecursiveBacktracking => {
                                 &RecursiveBacktracking
                             }
+                            MazeGenerationAlgorithms::Wilson => &Wilson,
                         },
                         &mut screen,
                         animate,
@@ -96,6 +100,7 @@ fn main() {
                             MazeGenerationAlgorithms::RecursiveBacktracking => {
                                 &RecursiveBacktracking
                             }
+                            MazeGenerationAlgorithms::Wilson => &Wilson,
                         },
                         &mut screen,
                         animate,

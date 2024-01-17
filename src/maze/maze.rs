@@ -108,8 +108,12 @@ impl Maze {
         screen: &mut dyn Write,
         animate: bool,
     ) {
+        // Draw the maze as empty as it is and draw it empty.
         self.reset();
+        self.draw(screen, false);
+        // Generate the maze.
         generator.generate(self, screen, animate);
+        // Generate the graph once.
         self.generate_graph();
     }
 
@@ -119,6 +123,7 @@ impl Maze {
         screen: &mut dyn Write,
         animate: bool,
     ) -> Vec<(usize, usize)> {
+        // Draw the maze again (this may delete the path from the previous solving).
         self.draw(screen, false);
         solver.solve(self, screen, animate)
     }

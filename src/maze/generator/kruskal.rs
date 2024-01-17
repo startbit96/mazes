@@ -1,7 +1,6 @@
 use crate::maze::animation::delay;
 use crate::maze::draw::{
-    draw_character, get_unique_colors, highlight_cell, highlight_cells_by_rgb_color,
-    SYMBOL_MAZE_FIELD_ACCESSIBLE,
+    draw_character, get_unique_colors, highlight_cells_by_rgb_color, SYMBOL_MAZE_FIELD_ACCESSIBLE,
 };
 use crate::maze::generator::{MazeGenerator, GENERATION_DELAY};
 use crate::maze::maze::*;
@@ -13,10 +12,23 @@ pub struct Kruskal;
 
 impl MazeGenerator for Kruskal {
     fn generate(&self, maze: &mut Maze, screen: &mut dyn Write, animate: bool) {
-        // Draw the maze as empty as it is.
-        maze.draw(screen, false);
+        /*
+        Algorithm:
 
-        let mut forest: Vec<Vec<(usize, usize)>> = vec![];
+        1. Initialization:
+        - Assign each cell to a separate set.
+        - Randomly shuffle the walls of the maze.
+
+        2. Iterative Union:
+        - Iterate through the shuffled walls.
+        - If the cells separated by a wall belong to different sets, remove the wall and unite the sets.
+
+        3. Termination:
+        - Continue until all cells are part of the same set.
+        - The resulting maze is a minimum spanning tree with connected cells and minimal total edge weight.
+        */
+
+        let mut forest: Vec<Vec<(usize, usize)>> = Vec::new();
 
         // Fill the forest with small trees. Each tree contains at the
         // beginning only one cell.

@@ -6,6 +6,7 @@ pub const GENERATION_DELAY: Delay = Delay::Middle;
 
 pub mod kruskal;
 pub mod recursive_backtracking;
+pub mod wilson;
 
 pub trait MazeGenerator {
     fn generate(&self, maze: &mut Maze, screen: &mut dyn Write, animate: bool);
@@ -15,13 +16,15 @@ pub trait MazeGenerator {
 pub enum MazeGenerationAlgorithms {
     Kruskal,
     RecursiveBacktracking,
+    Wilson,
 }
 
 impl MazeGenerationAlgorithms {
     pub fn next(&self) -> Self {
         match self {
             Self::Kruskal => Self::RecursiveBacktracking,
-            Self::RecursiveBacktracking => Self::Kruskal,
+            Self::RecursiveBacktracking => Self::Wilson,
+            Self::Wilson => Self::Kruskal,
         }
     }
 }

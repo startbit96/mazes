@@ -11,8 +11,15 @@ pub struct RecursiveBacktracking;
 
 impl MazeGenerator for RecursiveBacktracking {
     fn generate(&self, maze: &mut Maze, screen: &mut dyn Write, animate: bool) {
-        // Draw the maze as empty as it is.
-        maze.draw(screen, false);
+        /*
+        Algorithm:
+
+        1. Randomly choose a starting cell.
+        2. Randomly choose a wall at the current cell and open a passage through to any random adjacent
+            cell, that has not been visited yet. This is now the current cell.
+        3. If all adjacent cells have been visited, back up to the previous and repeat step 2.
+        4. Stop when the algorithm has backed all the way up to the starting cell.
+        */
 
         // Get all unvisited cells.
         let mut unvisited_cells: HashSet<(usize, usize)> = HashSet::new();
@@ -31,12 +38,24 @@ impl MazeGenerator for RecursiveBacktracking {
             .unwrap()
             .clone();
         maze.data[current_cell.1][current_cell.0] = MAZE_VALUE_ACCESSIBLE;
+        if animate {
+            draw_character(
+                screen,
+                maze,
+                current_cell,
+                SYMBOL_MAZE_FIELD_ACCESSIBLE,
+                false,
+            );
+            delay(GENERATION_DELAY);
+            screen.flush().unwrap();
+        }
+
         // Remove the starting cell from the unvisited cells.
         unvisited_cells.remove(&current_cell);
         // Keep track of the path you walked.
         let mut path: Vec<(usize, usize)> = Vec::new();
         while !unvisited_cells.is_empty() {
-            // Determine the possible direcitons you can choose from.
+            // Determine the possible directions you can choose from.
             let mut possible_directions: Vec<AbsoluteDirection> = Vec::new();
             // Look to the left.
             if current_cell.0 > 1 && unvisited_cells.contains(&(current_cell.0 - 2, current_cell.1))
@@ -44,7 +63,7 @@ impl MazeGenerator for RecursiveBacktracking {
                 possible_directions.push(AbsoluteDirection::Left);
             }
             // Look to the right.
-            if current_cell.0 < maze.width - 1
+            if current_cell.0 < maze.width - 2
                 && unvisited_cells.contains(&(current_cell.0 + 2, current_cell.1))
             {
                 possible_directions.push(AbsoluteDirection::Right);
@@ -55,7 +74,7 @@ impl MazeGenerator for RecursiveBacktracking {
                 possible_directions.push(AbsoluteDirection::Up);
             }
             // Look to the bottom.
-            if current_cell.1 < maze.height - 1
+            if current_cell.1 < maze.height - 2
                 && unvisited_cells.contains(&(current_cell.0, current_cell.1 + 2))
             {
                 possible_directions.push(AbsoluteDirection::Down);
