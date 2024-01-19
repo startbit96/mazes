@@ -3,7 +3,7 @@ use crate::maze::direction::{AbsoluteDirection, RelativeDirection};
 use crate::maze::draw::{draw_path, highlight_cell};
 use crate::maze::maze::Maze;
 use crate::maze::solver::{MazeSolver, SOLVING_DELAY};
-use std::collections::VecDeque;
+use std::collections::{HashSet, VecDeque};
 
 pub struct DepthFirstSearch;
 
@@ -13,7 +13,7 @@ impl MazeSolver for DepthFirstSearch {
         maze: &Maze,
         screen: &mut dyn std::io::Write,
         animate: bool,
-    ) -> Vec<(usize, usize)> {
+    ) -> (Vec<(usize, usize)>, usize) {
         let pos_start = (1, 1);
         let pos_end = (maze.width - 2, maze.height - 2);
         let mut queue: VecDeque<((usize, usize), AbsoluteDirection, Vec<(usize, usize)>)> =
@@ -21,12 +21,16 @@ impl MazeSolver for DepthFirstSearch {
         // Add the start position.
         queue.push_back((pos_start, AbsoluteDirection::Down, vec![pos_start]));
 
+        // Count the inspected cells.
+        let mut inspected_cells: HashSet<(usize, usize)> = HashSet::new();
+
         while !queue.is_empty() {
             let (pos, direction, path) = queue.pop_front().unwrap();
+            inspected_cells.insert(pos);
             highlight_cell(screen, maze, pos);
             if pos == pos_end {
                 draw_path(screen, maze, path.clone());
-                return path;
+                return (path, inspected_cells.len());
             }
             if animate {
                 delay(SOLVING_DELAY);

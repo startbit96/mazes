@@ -3,6 +3,7 @@ use crate::maze::direction::{AbsoluteDirection, RelativeDirection};
 use crate::maze::draw::{draw_character, draw_path, highlight_cell};
 use crate::maze::maze::Maze;
 use crate::maze::solver::{MazeSolver, SOLVING_DELAY};
+use std::collections::HashSet;
 
 pub struct WallFollower;
 
@@ -12,7 +13,7 @@ impl MazeSolver for WallFollower {
         maze: &Maze,
         screen: &mut dyn std::io::Write,
         animate: bool,
-    ) -> Vec<(usize, usize)> {
+    ) -> (Vec<(usize, usize)>, usize) {
         let mut pos_current = (1, 1);
         let mut pos_prev;
         let mut direction = if maze.is_accessible((1, 2)) {
@@ -21,7 +22,12 @@ impl MazeSolver for WallFollower {
             AbsoluteDirection::Right
         };
         let pos_end = (maze.width - 2, maze.height - 2);
+
+        // Count the inspected cells.
+        let mut inspected_cells: HashSet<(usize, usize)> = HashSet::new();
+
         while pos_current != pos_end {
+            inspected_cells.insert(pos_current);
             pos_prev = pos_current;
             // Follow the right wall.
             direction = direction.add_relative_direction(RelativeDirection::Right);
@@ -40,6 +46,9 @@ impl MazeSolver for WallFollower {
                 delay(SOLVING_DELAY);
             }
         }
-        Vec::new()
+        // Catch the last one.
+        inspected_cells.insert(pos_current);
+
+        (Vec::new(), inspected_cells.len())
     }
 }

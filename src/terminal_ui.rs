@@ -15,12 +15,15 @@ const TERMINAL_UI_APPLICATION_NAME_X_POS: u16 = 8;
 
 // Padding from the terminal edges to the border of the UI.
 const TERMINAL_UI_PADDING_OUTSIDE_HORIZONTAL: u16 = 1;
-const TERMINAL_UI_PADDING_OUTSIDE_VERTICAL: u16 = 1;
+const TERMINAL_UI_PADDING_OUTSIDE_VERTICAL: u16 = 4;
 // Min. padding from the border of the UI to the maze.
 const TERMINAL_UI_PADDING_INSIDE_HORIZONTAL: u16 = 1;
 const TERMINAL_UI_PADDING_INSIDE_VERTICAL: u16 = 1;
 
-pub fn intialize_terminal_ui<W: Write>(screen: &mut W) {
+pub const TERMINAL_WIDTH_MIN: u16 = 50;
+pub const TERMINAL_HEIGHT_MIN: u16 = 40;
+
+pub fn intialize_terminal_ui(screen: &mut dyn Write) {
     write!(screen, "{}", termion::clear::All).unwrap();
     draw_border(screen);
     screen.flush().unwrap();
@@ -36,7 +39,7 @@ pub fn get_max_draw_size() -> (usize, usize) {
 }
 
 // Erases only the area where a maze can be drawn.
-pub fn erase_draw_area<W: Write>(screen: &mut W) {
+pub fn erase_draw_area(screen: &mut dyn Write) {
     let (width, height) = termion::terminal_size().unwrap();
     write!(
         screen,
@@ -72,7 +75,7 @@ pub fn erase_draw_area<W: Write>(screen: &mut W) {
     screen.flush().unwrap();
 }
 
-fn draw_border<W: Write>(screen: &mut W) {
+fn draw_border(screen: &mut dyn Write) {
     let (width, height) = termion::terminal_size().unwrap();
     // We will first draw the complete box and afterwards print the
     // application name ontop of the box.
@@ -126,6 +129,41 @@ fn draw_border<W: Write>(screen: &mut W) {
         TERMINAL_UI_NAME_BORDER_LEFT,
         TERMINAL_UI_APPLICATION_NAME,
         TERMINAL_UI_NAME_BORDER_RIGHT
+    )
+    .unwrap();
+}
+
+pub fn print_informations(
+    screen: &mut dyn Write,
+    generation_algorithm: &str,
+    solving_algorithm: &str,
+    number_of_inspected_cells: usize,
+    animate: bool,
+) {
+    let (width, _) = termion::terminal_size().unwrap();
+    write!(
+        screen,
+        "{}{}{}generator: {}, solver: {}, insp. cells: {}, animate: {}",
+        termion::cursor::Goto(1, 1),
+        " ".repeat(width as usize),
+        termion::cursor::Goto(1, 1),
+        generation_algorithm,
+        solving_algorithm,
+        number_of_inspected_cells,
+        if animate { "ON" } else { "OFF" }
+    )
+    .unwrap();
+}
+
+pub fn print_solving_sequence(screen: &mut dyn Write, solving_sequence: String) {
+    let (width, height) = termion::terminal_size().unwrap();
+    write!(
+        screen,
+        "{}{}{}{}",
+        termion::cursor::Goto(1, height - TERMINAL_UI_PADDING_OUTSIDE_VERTICAL + 1),
+        " ".repeat((width * TERMINAL_UI_PADDING_OUTSIDE_VERTICAL) as usize),
+        termion::cursor::Goto(1, height - TERMINAL_UI_PADDING_OUTSIDE_VERTICAL + 1),
+        solving_sequence
     )
     .unwrap();
 }

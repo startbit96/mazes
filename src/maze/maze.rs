@@ -122,7 +122,7 @@ impl Maze {
         solver: &dyn MazeSolver,
         screen: &mut dyn Write,
         animate: bool,
-    ) -> Vec<(usize, usize)> {
+    ) -> (Vec<(usize, usize)>, usize) {
         // Draw the maze again (this may delete the path from the previous solving).
         self.draw(screen, false);
         solver.solve(self, screen, animate)

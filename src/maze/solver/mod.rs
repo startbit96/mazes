@@ -9,7 +9,12 @@ pub mod depth_first_search;
 pub mod wall_follower;
 
 pub trait MazeSolver {
-    fn solve(&self, maze: &Maze, screen: &mut dyn Write, animate: bool) -> Vec<(usize, usize)>;
+    fn solve(
+        &self,
+        maze: &Maze,
+        screen: &mut dyn Write,
+        animate: bool,
+    ) -> (Vec<(usize, usize)>, usize);
 }
 
 #[derive(Debug)]
@@ -25,6 +30,14 @@ impl MazeSolvingAlgorithms {
             Self::BreadthFirstSearch => Self::DepthFirstSearch,
             Self::DepthFirstSearch => Self::WallFollower,
             Self::WallFollower => Self::BreadthFirstSearch,
+        }
+    }
+
+    pub fn to_string(&self) -> &str {
+        match self {
+            Self::BreadthFirstSearch => "BFS",
+            Self::DepthFirstSearch => "DFS",
+            Self::WallFollower => "wall follower",
         }
     }
 }

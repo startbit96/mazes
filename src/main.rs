@@ -1,6 +1,7 @@
 use maze::draw::{draw_path, show_binary_representation};
 use maze::generator::{MazeGenerator, GENERATION_DELAY};
 use std::io::{stdin, stdout, Write};
+use terminal_ui::{TERMINAL_HEIGHT_MIN, TERMINAL_WIDTH_MIN};
 use termion::event::Key;
 use termion::input::TermRead;
 use termion::raw::IntoRawMode;
@@ -21,6 +22,13 @@ use maze::solver::{
 };
 
 fn main() {
+    // Check if the terminal is large enough.
+    let (terminal_width, terminal_height) = termion::terminal_size().unwrap();
+    if terminal_width < TERMINAL_WIDTH_MIN || terminal_height < TERMINAL_HEIGHT_MIN {
+        println!("The terminal is too small. Increase the size of the terminal and restart the application.");
+        return;
+    }
+
     // Initialize the alternate screen.
     let stdin = stdin();
     let mut screen = stdout()
@@ -42,8 +50,19 @@ fn main() {
 
     // Draw terminal ui and the maze.
     terminal_ui::intialize_terminal_ui(&mut screen);
+    terminal_ui::print_informations(
+        &mut screen,
+        generation_algorithm.to_string(),
+        solving_algorithm.to_string(),
+        0,
+        animate,
+    );
+
+    // Initialize the maze with the information about its max size.
     let (max_maze_width, max_maze_height) = terminal_ui::get_max_draw_size();
     let mut maze = Maze::new(max_maze_width, max_maze_height);
+
+    // Generate the first maze.
     maze.generate(
         match generation_algorithm {
             MazeGenerationAlgorithms::Kruskal => &Kruskal,
@@ -61,6 +80,15 @@ fn main() {
         match c.unwrap() {
             Key::Char('q') => break,
             Key::Char('r') => {
+                // Reset the informations in the UI.
+                terminal_ui::print_informations(
+                    &mut screen,
+                    generation_algorithm.to_string(),
+                    solving_algorithm.to_string(),
+                    0,
+                    animate,
+                );
+                terminal_ui::print_solving_sequence(&mut screen, String::new());
                 // Recreate.
                 maze.generate(
                     match generation_algorithm {
@@ -88,6 +116,15 @@ fn main() {
                         animate,
                     );
                     maze.draw(&mut screen, show_graph);
+                    // Reset the informations in the UI.
+                    terminal_ui::print_informations(
+                        &mut screen,
+                        generation_algorithm.to_string(),
+                        solving_algorithm.to_string(),
+                        0,
+                        animate,
+                    );
+                    terminal_ui::print_solving_sequence(&mut screen, String::new());
                 }
             }
             Key::Down | Key::Char('j') => {
@@ -106,19 +143,19 @@ fn main() {
                         animate,
                     );
                     maze.draw(&mut screen, show_graph);
+                    // Reset the informations in the UI.
+                    terminal_ui::print_informations(
+                        &mut screen,
+                        generation_algorithm.to_string(),
+                        solving_algorithm.to_string(),
+                        0,
+                        animate,
+                    );
+                    terminal_ui::print_solving_sequence(&mut screen, String::new());
                 }
             }
-            Key::Char('g') => {
-                // Show / hide graph nodes.
-                show_graph = !show_graph;
-                maze.draw(&mut screen, show_graph);
-            }
-            Key::Char('a') => {
-                // Toggle animation on / off.
-                animate = !animate;
-            }
             Key::Char('s') => {
-                let path = maze.solve(
+                let (path, number_of_inspected_cells) = maze.solve(
                     match solving_algorithm {
                         MazeSolvingAlgorithms::BreadthFirstSearch => &BreadthFirstSearch,
 
@@ -129,40 +166,102 @@ fn main() {
                     animate,
                 );
                 let solving_sequence = get_solving_sequence(&path);
-                let solving_sequence: String = solving_sequence.iter().collect();
-                write!(
-                    screen,
-                    "{}{:?}",
-                    termion::cursor::Goto(5, 5),
-                    solving_sequence
-                )
-                .unwrap();
+                let mut solving_sequence: String = solving_sequence.iter().collect();
+                if solving_sequence.len() == 0 {
+                    solving_sequence = String::from("No solving sequence available.");
+                }
+                // Print the informations in the UI.
+                terminal_ui::print_informations(
+                    &mut screen,
+                    generation_algorithm.to_string(),
+                    solving_algorithm.to_string(),
+                    number_of_inspected_cells,
+                    animate,
+                );
+                terminal_ui::print_solving_sequence(&mut screen, solving_sequence);
             }
             Key::Char('h') => {
                 // Next generation algorithm.
                 generation_algorithm = generation_algorithm.next();
+                // Print / reset the informations in the UI.
+                terminal_ui::print_informations(
+                    &mut screen,
+                    generation_algorithm.to_string(),
+                    solving_algorithm.to_string(),
+                    0,
+                    animate,
+                );
+                terminal_ui::print_solving_sequence(&mut screen, String::new());
+                // Recreate.
+                maze.generate(
+                    match generation_algorithm {
+                        MazeGenerationAlgorithms::Kruskal => &Kruskal,
+                        MazeGenerationAlgorithms::RecursiveBacktracking => &RecursiveBacktracking,
+                        MazeGenerationAlgorithms::Wilson => &Wilson,
+                    },
+                    &mut screen,
+                    animate,
+                );
+                maze.draw(&mut screen, show_graph);
             }
             Key::Char('l') => {
                 // Next solving algorithm.
                 solving_algorithm = solving_algorithm.next();
-            }
-            Key::Char('c') => {
-                // Redraw the maze (remove the solved path).
+                // Print / reset the informations in the UI.
+                terminal_ui::print_informations(
+                    &mut screen,
+                    generation_algorithm.to_string(),
+                    solving_algorithm.to_string(),
+                    0,
+                    animate,
+                );
+                terminal_ui::print_solving_sequence(&mut screen, String::new());
+                // Redraw the maze but do not solve it yet (may trigger the animation).
                 maze.draw(&mut screen, show_graph);
             }
+            Key::Char('g') => {
+                // Show / hide graph nodes.
+                show_graph = !show_graph;
+                maze.draw(&mut screen, show_graph);
+                // Reset the informations in the UI.
+                terminal_ui::print_informations(
+                    &mut screen,
+                    generation_algorithm.to_string(),
+                    solving_algorithm.to_string(),
+                    0,
+                    animate,
+                );
+                terminal_ui::print_solving_sequence(&mut screen, String::new());
+            }
+            Key::Char('a') => {
+                // Toggle animation on / off.
+                animate = !animate;
+                // Print the informations in the UI.
+                terminal_ui::print_informations(
+                    &mut screen,
+                    generation_algorithm.to_string(),
+                    solving_algorithm.to_string(),
+                    0,
+                    animate,
+                );
+            }
             Key::Char('b') => {
+                // Show the binary representation.
                 show_representation = !show_representation;
                 if show_representation {
                     show_binary_representation(&mut screen, &maze);
                 } else {
                     maze.draw(&mut screen, show_graph);
                 }
-            }
-            Key::Char('w') => {
-                let solving_sequence: Vec<char> =
-                    vec!['d', 'd', 'r', 'r', 'd', 'd', 'l', 'l', 'u', 'u', 'r'];
-                let path = apply_solving_sequence(&maze, (1, 1), solving_sequence);
-                draw_path(&mut screen, &maze, path);
+                // Reset the informations in the UI.
+                terminal_ui::print_informations(
+                    &mut screen,
+                    generation_algorithm.to_string(),
+                    solving_algorithm.to_string(),
+                    0,
+                    animate,
+                );
+                terminal_ui::print_solving_sequence(&mut screen, String::new());
             }
             _ => {}
         }

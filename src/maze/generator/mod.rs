@@ -27,4 +27,12 @@ impl MazeGenerationAlgorithms {
             Self::Wilson => Self::Kruskal,
         }
     }
+
+    pub fn to_string(&self) -> &str {
+        match self {
+            Self::Kruskal => "kruskal",
+            Self::RecursiveBacktracking => "recursive backtracking",
+            Self::Wilson => "wilson",
+        }
+    }
 }
