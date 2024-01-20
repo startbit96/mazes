@@ -128,7 +128,13 @@ pub fn highlight_cell(screen: &mut dyn Write, maze: &Maze, pos: (usize, usize)) 
         "{}{}{}{}",
         termion::cursor::Goto(maze_pos_x + pos.0 as u16, maze_pos_y + pos.1 as u16),
         termion::color::Bg(termion::color::LightGreen),
-        SYMBOL_MAZE_FIELD_ACCESSIBLE,
+        if pos == maze.pos_start {
+            SYMBOL_MAZE_POS_START
+        } else if pos == maze.pos_end {
+            SYMBOL_MAZE_POS_END
+        } else {
+            SYMBOL_MAZE_FIELD_ACCESSIBLE
+        },
         termion::color::Bg(termion::color::Reset),
     )
     .unwrap();
@@ -148,7 +154,13 @@ pub fn highlight_cells_by_rgb_color(
             "{}{}{}{}",
             termion::cursor::Goto(maze_pos_x + *x as u16, maze_pos_y + *y as u16),
             termion::color::Bg(termion::color::Rgb(color.0, color.1, color.2)),
-            SYMBOL_MAZE_FIELD_ACCESSIBLE,
+            if (*x, *y) == maze.pos_start {
+                SYMBOL_MAZE_POS_START
+            } else if (*x, *y) == maze.pos_end {
+                SYMBOL_MAZE_POS_END
+            } else {
+                SYMBOL_MAZE_FIELD_ACCESSIBLE
+            },
             termion::color::Bg(termion::color::Reset),
         )
         .unwrap();
@@ -200,46 +212,52 @@ pub fn draw_path(screen: &mut dyn Write, maze: &Maze, path: Vec<(usize, usize)>)
             screen,
             maze,
             *pos,
-            match (
-                pos_prev.0 as isize - pos.0 as isize,
-                pos_prev.1 as isize - pos.1 as isize,
-                pos_next.0 as isize - pos.0 as isize,
-                pos_next.1 as isize - pos.1 as isize,
-            ) {
-                // single position.
-                (0, 0, 0, 0) => SYMBOL_MAZE_PATH_SINGLE_POSITION,
-                // dead end to the right.
-                (-1, 0, 0, 0) => SYMBOL_MAZE_PATH_DEAD_END_RIGHT,
-                (0, 0, -1, 0) => SYMBOL_MAZE_PATH_DEAD_END_RIGHT,
-                // dead end to the left.
-                (1, 0, 0, 0) => SYMBOL_MAZE_PATH_DEAD_END_LEFT,
-                (0, 0, 1, 0) => SYMBOL_MAZE_PATH_DEAD_END_LEFT,
-                // dead end to the top.
-                (0, 1, 0, 0) => SYMBOL_MAZE_PATH_DEAD_END_TOP,
-                (0, 0, 0, 1) => SYMBOL_MAZE_PATH_DEAD_END_TOP,
-                // dead end to the bottom.
-                (0, -1, 0, 0) => SYMBOL_MAZE_PATH_DEAD_END_BOTTOM,
-                (0, 0, 0, -1) => SYMBOL_MAZE_PATH_DEAD_END_BOTTOM,
-                // horizontal.
-                (-1, 0, 1, 0) => SYMBOL_MAZE_PATH_HORIZONTAL,
-                (1, 0, -1, 0) => SYMBOL_MAZE_PATH_HORIZONTAL,
-                // vertical.
-                (0, -1, 0, 1) => SYMBOL_MAZE_PATH_VERTICAL,
-                (0, 1, 0, -1) => SYMBOL_MAZE_PATH_VERTICAL,
-                // curve left and up.
-                (-1, 0, 0, -1) => SYMBOL_MAZE_PATH_CURVE_LEFT_UP,
-                (0, -1, -1, 0) => SYMBOL_MAZE_PATH_CURVE_LEFT_UP,
-                // curve left and down.
-                (-1, 0, 0, 1) => SYMBOL_MAZE_PATH_CURVE_LEFT_DOWN,
-                (0, 1, -1, 0) => SYMBOL_MAZE_PATH_CURVE_LEFT_DOWN,
-                // curve right and up.
-                (1, 0, 0, -1) => SYMBOL_MAZE_PATH_CURVE_RIGHT_UP,
-                (0, -1, 1, 0) => SYMBOL_MAZE_PATH_CURVE_RIGHT_UP,
-                // curve right and down.
-                (1, 0, 0, 1) => SYMBOL_MAZE_PATH_CURVE_RIGHT_DOWN,
-                (0, 1, 1, 0) => SYMBOL_MAZE_PATH_CURVE_RIGHT_DOWN,
-                // hopefully I forgot nothing.
-                _ => '?',
+            if *pos == maze.pos_start {
+                SYMBOL_MAZE_POS_START
+            } else if *pos == maze.pos_end {
+                SYMBOL_MAZE_POS_END
+            } else {
+                match (
+                    pos_prev.0 as isize - pos.0 as isize,
+                    pos_prev.1 as isize - pos.1 as isize,
+                    pos_next.0 as isize - pos.0 as isize,
+                    pos_next.1 as isize - pos.1 as isize,
+                ) {
+                    // single position.
+                    (0, 0, 0, 0) => SYMBOL_MAZE_PATH_SINGLE_POSITION,
+                    // dead end to the right.
+                    (-1, 0, 0, 0) => SYMBOL_MAZE_PATH_DEAD_END_RIGHT,
+                    (0, 0, -1, 0) => SYMBOL_MAZE_PATH_DEAD_END_RIGHT,
+                    // dead end to the left.
+                    (1, 0, 0, 0) => SYMBOL_MAZE_PATH_DEAD_END_LEFT,
+                    (0, 0, 1, 0) => SYMBOL_MAZE_PATH_DEAD_END_LEFT,
+                    // dead end to the top.
+                    (0, 1, 0, 0) => SYMBOL_MAZE_PATH_DEAD_END_TOP,
+                    (0, 0, 0, 1) => SYMBOL_MAZE_PATH_DEAD_END_TOP,
+                    // dead end to the bottom.
+                    (0, -1, 0, 0) => SYMBOL_MAZE_PATH_DEAD_END_BOTTOM,
+                    (0, 0, 0, -1) => SYMBOL_MAZE_PATH_DEAD_END_BOTTOM,
+                    // horizontal.
+                    (-1, 0, 1, 0) => SYMBOL_MAZE_PATH_HORIZONTAL,
+                    (1, 0, -1, 0) => SYMBOL_MAZE_PATH_HORIZONTAL,
+                    // vertical.
+                    (0, -1, 0, 1) => SYMBOL_MAZE_PATH_VERTICAL,
+                    (0, 1, 0, -1) => SYMBOL_MAZE_PATH_VERTICAL,
+                    // curve left and up.
+                    (-1, 0, 0, -1) => SYMBOL_MAZE_PATH_CURVE_LEFT_UP,
+                    (0, -1, -1, 0) => SYMBOL_MAZE_PATH_CURVE_LEFT_UP,
+                    // curve left and down.
+                    (-1, 0, 0, 1) => SYMBOL_MAZE_PATH_CURVE_LEFT_DOWN,
+                    (0, 1, -1, 0) => SYMBOL_MAZE_PATH_CURVE_LEFT_DOWN,
+                    // curve right and up.
+                    (1, 0, 0, -1) => SYMBOL_MAZE_PATH_CURVE_RIGHT_UP,
+                    (0, -1, 1, 0) => SYMBOL_MAZE_PATH_CURVE_RIGHT_UP,
+                    // curve right and down.
+                    (1, 0, 0, 1) => SYMBOL_MAZE_PATH_CURVE_RIGHT_DOWN,
+                    (0, 1, 1, 0) => SYMBOL_MAZE_PATH_CURVE_RIGHT_DOWN,
+                    // hopefully I forgot nothing.
+                    _ => '?',
+                }
             },
             false,
         );
