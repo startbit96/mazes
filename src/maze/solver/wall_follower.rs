@@ -14,19 +14,18 @@ impl MazeSolver for WallFollower {
         screen: &mut dyn std::io::Write,
         animate: bool,
     ) -> (Vec<(usize, usize)>, usize) {
-        let mut pos_current = (1, 1);
+        let mut pos_current = maze.pos_start;
         let mut pos_prev;
         let mut direction = if maze.is_accessible((1, 2)) {
             AbsoluteDirection::Down
         } else {
             AbsoluteDirection::Right
         };
-        let pos_end = (maze.width - 2, maze.height - 2);
 
         // Count the inspected cells.
         let mut inspected_cells: HashSet<(usize, usize)> = HashSet::new();
 
-        while pos_current != pos_end {
+        while pos_current != maze.pos_end {
             inspected_cells.insert(pos_current);
             pos_prev = pos_current;
             // Follow the right wall.

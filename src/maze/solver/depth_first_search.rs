@@ -14,12 +14,14 @@ impl MazeSolver for DepthFirstSearch {
         screen: &mut dyn std::io::Write,
         animate: bool,
     ) -> (Vec<(usize, usize)>, usize) {
-        let pos_start = (1, 1);
-        let pos_end = (maze.width - 2, maze.height - 2);
         let mut queue: VecDeque<((usize, usize), AbsoluteDirection, Vec<(usize, usize)>)> =
             VecDeque::new();
         // Add the start position.
-        queue.push_back((pos_start, AbsoluteDirection::Down, vec![pos_start]));
+        queue.push_back((
+            maze.pos_start,
+            AbsoluteDirection::Down,
+            vec![maze.pos_start],
+        ));
 
         // Count the inspected cells.
         let mut inspected_cells: HashSet<(usize, usize)> = HashSet::new();
@@ -28,7 +30,7 @@ impl MazeSolver for DepthFirstSearch {
             let (pos, direction, path) = queue.pop_front().unwrap();
             inspected_cells.insert(pos);
             highlight_cell(screen, maze, pos);
-            if pos == pos_end {
+            if pos == maze.pos_end {
                 draw_path(screen, maze, path.clone());
                 return (path, inspected_cells.len());
             }

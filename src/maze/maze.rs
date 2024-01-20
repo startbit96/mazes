@@ -14,6 +14,8 @@ pub const MAZE_VALUE_BLOCKED: bool = true;
 pub struct Maze {
     pub width: usize,
     pub height: usize,
+    pub pos_start: (usize, usize),
+    pub pos_end: (usize, usize),
     pub max_width: usize,
     pub max_height: usize,
     pub data: Vec<Vec<bool>>,
@@ -43,6 +45,8 @@ impl Maze {
         Maze {
             width,
             height,
+            pos_start: (1, 1),
+            pos_end: (width - 2, height - 2),
             max_width,
             max_height,
             data: vec![vec![MAZE_VALUE_BLOCKED; height]; height],
@@ -75,6 +79,8 @@ impl Maze {
         }
         self.width = width;
         self.height = height;
+        self.pos_start = (1, 1);
+        self.pos_end = (width - 2, height - 2);
         self.data = vec![vec![MAZE_VALUE_BLOCKED; width]; height];
         self.is_node = vec![vec![false; width]; height];
         return true;
