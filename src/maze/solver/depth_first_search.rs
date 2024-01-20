@@ -14,14 +14,13 @@ impl MazeSolver for DepthFirstSearch {
         screen: &mut dyn std::io::Write,
         animate: bool,
     ) -> (Vec<(usize, usize)>, usize) {
-        let mut queue: VecDeque<((usize, usize), AbsoluteDirection, Vec<(usize, usize)>)> =
-            VecDeque::new();
+        let mut queue: VecDeque<(
+            (usize, usize),
+            Option<AbsoluteDirection>,
+            Vec<(usize, usize)>,
+        )> = VecDeque::new();
         // Add the start position.
-        queue.push_back((
-            maze.pos_start,
-            AbsoluteDirection::Down,
-            vec![maze.pos_start],
-        ));
+        queue.push_back((maze.pos_start, None, vec![maze.pos_start]));
 
         // Count the inspected cells.
         let mut inspected_cells: HashSet<(usize, usize)> = HashSet::new();
@@ -41,17 +40,27 @@ impl MazeSolver for DepthFirstSearch {
             // Never go back.
             // In order to first look right and also in the next run to first look right,
             // we need to insert the right one last.
-            let possible_directions: Vec<AbsoluteDirection> = vec![
-                direction.add_relative_direction(RelativeDirection::Left),
-                direction.add_relative_direction(RelativeDirection::Forward),
-                direction.add_relative_direction(RelativeDirection::Right),
-            ];
+            let possible_directions: Vec<AbsoluteDirection> = if let Some(direction) = direction {
+                vec![
+                    direction.add_relative_direction(RelativeDirection::Left),
+                    direction.add_relative_direction(RelativeDirection::Forward),
+                    direction.add_relative_direction(RelativeDirection::Right),
+                ]
+            } else {
+                vec![
+                    AbsoluteDirection::Up,
+                    AbsoluteDirection::Left,
+                    AbsoluteDirection::Down,
+                    AbsoluteDirection::Right,
+                ]
+            };
+
             for next_direction in possible_directions.iter() {
                 let pos_next = next_direction.apply(pos);
                 if maze.is_accessible(pos_next) {
                     let mut path_next = path.clone();
                     path_next.push(pos_next.clone());
-                    queue.push_front((pos_next, *next_direction, path_next));
+                    queue.push_front((pos_next, Some(*next_direction), path_next));
                 }
             }
         }

@@ -16,10 +16,17 @@ impl MazeSolver for WallFollower {
     ) -> (Vec<(usize, usize)>, usize) {
         let mut pos_current = maze.pos_start;
         let mut pos_prev;
-        let mut direction = if maze.is_accessible((1, 2)) {
-            AbsoluteDirection::Down
-        } else {
-            AbsoluteDirection::Right
+        let mut direction = match (
+            maze.is_accessible((pos_current.0, pos_current.1 - 1)),
+            maze.is_accessible((pos_current.0 - 1, pos_current.1)),
+            maze.is_accessible((pos_current.0, pos_current.1 + 1)),
+            maze.is_accessible((pos_current.0 + 1, pos_current.1)),
+        ) {
+            (true, _, _, _) => AbsoluteDirection::Up,
+            (_, true, _, _) => AbsoluteDirection::Left,
+            (_, _, true, _) => AbsoluteDirection::Down,
+            (_, _, _, true) => AbsoluteDirection::Right,
+            _ => panic!(),
         };
 
         // Count the inspected cells.

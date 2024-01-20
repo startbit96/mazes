@@ -1,6 +1,7 @@
 use crate::maze::draw::*;
 use crate::maze::generator::MazeGenerator;
 use crate::maze::solver::MazeSolver;
+use rand::seq::SliceRandom;
 use std::io::Write;
 
 const MAZE_EDGE_LENGTH_MIN: usize = 11;
@@ -105,6 +106,49 @@ impl Maze {
             for value in row {
                 *value = MAZE_VALUE_BLOCKED;
             }
+        }
+    }
+
+    pub fn reset_start_end_position(&mut self) {
+        self.pos_start = (1, 1);
+        self.pos_end = (self.width - 2, self.height - 2);
+    }
+
+    pub fn set_start_end_position(
+        &mut self,
+        pos_start: Option<(usize, usize)>,
+        pos_end: Option<(usize, usize)>,
+    ) {
+        if let Some(pos) = pos_start {
+            self.pos_start = pos;
+        }
+        if let Some(pos) = pos_end {
+            self.pos_end = pos;
+        }
+    }
+
+    fn get_random_accessible_position(&self) -> (usize, usize) {
+        self.data
+            .iter()
+            .enumerate()
+            .flat_map(|(y, row)| {
+                row.iter()
+                    .enumerate()
+                    .filter(|&(_, &value)| value == MAZE_VALUE_ACCESSIBLE)
+                    .map(move |(x, _)| (x, y))
+            })
+            .collect::<Vec<(usize, usize)>>()
+            .choose(&mut rand::thread_rng())
+            .cloned()
+            .unwrap()
+    }
+
+    pub fn set_random_start_end_position(&mut self) {
+        // The two positions need to be accessible and also not the same.
+        self.pos_start = self.get_random_accessible_position();
+        self.pos_end = self.get_random_accessible_position();
+        while self.pos_end == self.pos_start {
+            self.pos_end = self.get_random_accessible_position();
         }
     }
 

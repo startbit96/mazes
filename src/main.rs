@@ -99,6 +99,14 @@ fn main() {
                     &mut screen,
                     animate,
                 );
+                maze.set_random_start_end_position();
+                terminal_ui::print_solving_sequence(
+                    &mut screen,
+                    String::from(format!(
+                        "start: {:?}, end: {:?}",
+                        maze.pos_start, maze.pos_end
+                    )),
+                );
                 maze.draw(&mut screen, show_graph);
             }
             Key::Up | Key::Char('k') => {

@@ -5,6 +5,8 @@ use std::io::Write;
 pub const SYMBOL_MAZE_FIELD_ACCESSIBLE: char = ' ';
 pub const SYMBOL_MAZE_FIELD_BLOCKED: char = '█';
 const SYMBOL_MAZE_ERASED: char = ' ';
+const SYMBOL_MAZE_POS_START: char = 'S';
+const SYMBOL_MAZE_POS_END: char = 'E';
 
 const SYMBOL_MAZE_GRAPH_NODE: char = '◉';
 const SYMBOL_MAZE_GRAPH_CONNECTION_HORIZONTAL: char = '─';
@@ -60,7 +62,15 @@ pub fn draw_maze(screen: &mut dyn Write, maze: &Maze, show_graph: bool) {
                 .map(|(col, (&is_accessible, &is_node))| {
                     match (is_accessible, is_node, show_graph) {
                         (MAZE_VALUE_BLOCKED, _, _) => SYMBOL_MAZE_FIELD_BLOCKED,
-                        (MAZE_VALUE_ACCESSIBLE, _, false) => SYMBOL_MAZE_FIELD_ACCESSIBLE,
+                        (MAZE_VALUE_ACCESSIBLE, _, false) => {
+                            if (col, row) == maze.pos_start {
+                                SYMBOL_MAZE_POS_START
+                            } else if (col, row) == maze.pos_end {
+                                SYMBOL_MAZE_POS_END
+                            } else {
+                                SYMBOL_MAZE_FIELD_ACCESSIBLE
+                            }
+                        }
                         (MAZE_VALUE_ACCESSIBLE, true, true) => SYMBOL_MAZE_GRAPH_NODE,
                         (MAZE_VALUE_ACCESSIBLE, false, true) => match maze.data[row][col - 1] {
                             MAZE_VALUE_ACCESSIBLE => SYMBOL_MAZE_GRAPH_CONNECTION_HORIZONTAL,

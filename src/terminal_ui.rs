@@ -153,6 +153,7 @@ pub fn print_informations(
         if animate { "ON" } else { "OFF" }
     )
     .unwrap();
+    screen.flush().unwrap();
 }
 
 pub fn print_solving_sequence(screen: &mut dyn Write, solving_sequence: String) {
@@ -166,4 +167,5 @@ pub fn print_solving_sequence(screen: &mut dyn Write, solving_sequence: String) 
         solving_sequence
     )
     .unwrap();
+    screen.flush().unwrap();
 }
