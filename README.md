@@ -1,12 +1,17 @@
 # mazes
-Maze-generation and maze-solving written in Rust.  
+Maze-generation and maze-solving written in Rust and visualized in the terminal.  
 
 ## Overview.
 
 ### Implemented maze-generation algorithms.
 * Kruskal
+* Wilson
+* Recursive backtracking
 
 ### Implemented maze-solving algorithms.
+* Breadth-first search (BFS)
+* Depth-first search (DFS)
+* Wall-follower
 
 ## Key bindings.
 
@@ -15,8 +20,14 @@ Maze-generation and maze-solving written in Rust.
 | `r` | re-create the maze |  
 | `k` or `↑` | increase size of the maze |  
 | `j` or `↓` | decrease size of the maze |  
+| `n` | set the start and end position at random positions |  
+| `m` | reset the start and end position to the top left and bottom right corner |  
+| `s` | solve the maze |  
+| `h` | switch to the next generation algorithm |  
+| `l` | switch to the next solving algorithm |  
 | `g` | toggle graph visualization on / off |  
 | `a` | toggle animation on / off |  
+| `b` | toggle binary representation on / off |  
 | `q` | quit the application |  
 
 ## Notes.

@@ -99,14 +99,6 @@ fn main() {
                     &mut screen,
                     animate,
                 );
-                maze.set_random_start_end_position();
-                terminal_ui::print_solving_sequence(
-                    &mut screen,
-                    String::from(format!(
-                        "start: {:?}, end: {:?}",
-                        maze.pos_start, maze.pos_end
-                    )),
-                );
                 maze.draw(&mut screen, show_graph);
             }
             Key::Up | Key::Char('k') => {
@@ -163,6 +155,36 @@ fn main() {
                     );
                     terminal_ui::print_solving_sequence(&mut screen, String::new());
                 }
+            }
+            Key::Char('n') => {
+                // Reset the informations in the UI.
+                terminal_ui::print_informations(
+                    &mut screen,
+                    generation_algorithm.to_string(),
+                    solving_algorithm.to_string(),
+                    0,
+                    animate,
+                );
+                terminal_ui::print_solving_sequence(&mut screen, String::new());
+                // Make the start and end position random.
+                maze.set_random_start_end_position();
+                // Redraw.
+                maze.draw(&mut screen, show_graph);
+            }
+            Key::Char('m') => {
+                // Reset the informations in the UI.
+                terminal_ui::print_informations(
+                    &mut screen,
+                    generation_algorithm.to_string(),
+                    solving_algorithm.to_string(),
+                    0,
+                    animate,
+                );
+                terminal_ui::print_solving_sequence(&mut screen, String::new());
+                // Reset the start and end position.
+                maze.reset_start_end_position();
+                // Redraw.
+                maze.draw(&mut screen, show_graph);
             }
             Key::Char('s') => {
                 let (path, number_of_inspected_cells) = maze.solve(
