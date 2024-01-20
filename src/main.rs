@@ -104,6 +104,7 @@ fn main() {
             Key::Up | Key::Char('k') => {
                 // Increase size.
                 if maze.change_size(maze.width + 2, maze.height + 2) {
+                    // Generate without animation.
                     maze.generate(
                         match generation_algorithm {
                             MazeGenerationAlgorithms::Kruskal => &Kruskal,
@@ -113,7 +114,7 @@ fn main() {
                             MazeGenerationAlgorithms::Wilson => &Wilson,
                         },
                         &mut screen,
-                        animate,
+                        false,
                     );
                     maze.draw(&mut screen, show_graph);
                     // Reset the informations in the UI.
@@ -131,6 +132,7 @@ fn main() {
                 // Decrease size.
                 if maze.change_size(maze.width - 2, maze.height - 2) {
                     terminal_ui::erase_draw_area(&mut screen);
+                    // Generate without animation.
                     maze.generate(
                         match generation_algorithm {
                             MazeGenerationAlgorithms::Kruskal => &Kruskal,
@@ -140,7 +142,7 @@ fn main() {
                             MazeGenerationAlgorithms::Wilson => &Wilson,
                         },
                         &mut screen,
-                        animate,
+                        false,
                     );
                     maze.draw(&mut screen, show_graph);
                     // Reset the informations in the UI.
@@ -192,7 +194,7 @@ fn main() {
                     animate,
                 );
                 terminal_ui::print_solving_sequence(&mut screen, String::new());
-                // Recreate.
+                // Recreate (without animation).
                 maze.generate(
                     match generation_algorithm {
                         MazeGenerationAlgorithms::Kruskal => &Kruskal,
@@ -200,7 +202,7 @@ fn main() {
                         MazeGenerationAlgorithms::Wilson => &Wilson,
                     },
                     &mut screen,
-                    animate,
+                    false,
                 );
                 maze.draw(&mut screen, show_graph);
             }
