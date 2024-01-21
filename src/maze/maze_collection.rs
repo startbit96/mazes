@@ -60,9 +60,9 @@ impl MazeCollection {
             .for_each(|maze| maze.draw(screen, show_graph));
     }
 
-    pub fn show_binary_representation(&self, screen: &mut dyn Write) {
+    pub fn show_binary_representation(&self, screen: &mut dyn Write, highlight_background: bool) {
         self.mazes
             .iter()
-            .for_each(|maze| maze.show_binary_representation(screen));
+            .for_each(|maze| maze.show_binary_representation(screen, highlight_background));
     }
 }

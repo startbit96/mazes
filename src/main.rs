@@ -44,7 +44,8 @@ fn main() {
 
     // To toggle visualization options.
     let mut show_graph: bool = false;
-    let mut show_representation: bool = false;
+    let mut show_binary_representation: bool = false;
+    let mut show_background_binary_representation: bool = false;
     let mut animate: bool = false;
 
     // Selected algorithms.
@@ -424,16 +425,33 @@ fn main() {
             }
             Key::Char('b') => {
                 // Show the binary representation.
-                show_representation = !show_representation;
+                (
+                    show_binary_representation,
+                    show_background_binary_representation,
+                ) = match (
+                    show_binary_representation,
+                    show_background_binary_representation,
+                ) {
+                    (false, false) => (true, false),
+                    (true, false) => (true, true),
+                    (true, true) => (false, false),
+                    _ => unreachable!(),
+                };
                 if let MazeType::SingleMaze(ref maze) = maze_container {
-                    if show_representation {
-                        maze.show_binary_representation(&mut screen);
+                    if show_binary_representation {
+                        maze.show_binary_representation(
+                            &mut screen,
+                            show_background_binary_representation,
+                        );
                     } else {
                         maze.draw(&mut screen, show_graph);
                     }
                 } else if let MazeType::MultipleMazes(ref maze_collection) = maze_container {
-                    if show_representation {
-                        maze_collection.show_binary_representation(&mut screen);
+                    if show_binary_representation {
+                        maze_collection.show_binary_representation(
+                            &mut screen,
+                            show_background_binary_representation,
+                        );
                     } else {
                         maze_collection.draw(&mut screen, show_graph);
                     }

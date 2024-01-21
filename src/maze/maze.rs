@@ -198,8 +198,8 @@ impl Maze {
         erase_maze(screen, self);
     }
 
-    pub fn show_binary_representation(&self, screen: &mut dyn Write) {
-        show_binary_representation(screen, self);
+    pub fn show_binary_representation(&self, screen: &mut dyn Write, highlight_background: bool) {
+        show_binary_representation(screen, self, highlight_background);
     }
 
     pub fn generate_graph(&mut self) {

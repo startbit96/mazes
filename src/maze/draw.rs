@@ -24,6 +24,9 @@ const SYMBOL_MAZE_PATH_DEAD_END_LEFT: char = '╾';
 const SYMBOL_MAZE_PATH_DEAD_END_RIGHT: char = '╼';
 const SYMBOL_MAZE_PATH_SINGLE_POSITION: char = '╳';
 
+const CHAR_MAZE_ACCESSIBLE: char = '0';
+const CHAR_MAZE_BLOCKED: char = '1';
+
 const MULTIPLE_MAZES_DRAW_DISTANCE: usize = 3;
 
 fn calculate_maze_position(maze: &Maze) -> (u16, u16) {
@@ -104,7 +107,7 @@ pub fn draw_maze(screen: &mut dyn Write, maze: &Maze, show_graph: bool) {
     screen.flush().unwrap();
 }
 
-pub fn show_binary_representation(screen: &mut dyn Write, maze: &Maze) {
+pub fn show_binary_representation(screen: &mut dyn Write, maze: &Maze, highlight_background: bool) {
     erase_maze(screen, maze);
     let (maze_pos_x, maze_pos_y) = calculate_maze_position(maze);
     for row in 0..maze.height {
@@ -114,16 +117,27 @@ pub fn show_binary_representation(screen: &mut dyn Write, maze: &Maze) {
             termion::cursor::Goto(maze_pos_x, maze_pos_y + row as u16),
             maze.data[row]
                 .iter()
-                .map(|is_accessible| match is_accessible {
-                    true => format!(
-                        "{}{}1",
+                .map(|is_accessible| match *is_accessible {
+                    MAZE_VALUE_ACCESSIBLE => format!(
+                        "{}{}{}",
                         termion::color::Fg(termion::color::Black),
-                        termion::color::Bg(termion::color::White)
+                        match highlight_background {
+                            true => format!("{}", termion::color::Bg(termion::color::White)),
+                            false => format!("{}", termion::color::Bg(termion::color::Reset)),
+                        },
+                        CHAR_MAZE_ACCESSIBLE
                     ),
-                    false => format!(
-                        "{}{}0",
-                        termion::color::Fg(termion::color::White),
-                        termion::color::Bg(termion::color::Black)
+                    MAZE_VALUE_BLOCKED => format!(
+                        "{}{}{}",
+                        match highlight_background {
+                            true => format!("{}", termion::color::Fg(termion::color::White)),
+                            false => format!("{}", termion::color::Fg(termion::color::Black)),
+                        },
+                        match highlight_background {
+                            true => format!("{}", termion::color::Bg(termion::color::Black)),
+                            false => format!("{}", termion::color::Bg(termion::color::Reset)),
+                        },
+                        CHAR_MAZE_BLOCKED
                     ),
                 })
                 .collect::<String>()
