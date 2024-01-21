@@ -20,6 +20,7 @@ Maze-generation and maze-solving written in Rust and visualized in the terminal.
 | `r` | re-create the maze |  
 | `k` or `↑` | increase size of the maze |  
 | `j` or `↓` | decrease size of the maze |  
+| `1` - `5` | set the number of mazes |  
 | `n` | set the start and end position at random positions |  
 | `m` | reset the start and end position to the top left and bottom right corner |  
 | `s` | solve the maze |  
@@ -27,7 +28,7 @@ Maze-generation and maze-solving written in Rust and visualized in the terminal.
 | `l` | switch to the next solving algorithm |  
 | `g` | toggle graph visualization on / off |  
 | `a` | toggle animation on / off |  
-| `b` | toggle binary representation on / off |  
+| `b` | toggle binary representation on (with / without background) / off |  
 | `q` | quit the application |  
 
 ## Notes.

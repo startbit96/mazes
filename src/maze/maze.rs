@@ -194,14 +194,14 @@ impl Maze {
         &self,
         screen: &mut dyn Write,
         show_graph: bool,
-        show_binary_presentation: bool,
-        highlight_binary_presentation: bool,
+        show_binary_representation: bool,
+        highlight_binary_representation: bool,
     ) {
-        if show_graph && (show_binary_presentation || highlight_binary_presentation) {
+        if show_graph && (show_binary_representation || highlight_binary_representation) {
             panic!();
         }
-        if show_binary_presentation {
-            show_binary_representation(screen, self, highlight_binary_presentation);
+        if show_binary_representation {
+            draw_binary_representation(screen, self, highlight_binary_representation);
         } else {
             draw_maze(screen, self, show_graph);
         }

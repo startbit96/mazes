@@ -8,6 +8,10 @@ pub mod kruskal;
 pub mod recursive_backtracking;
 pub mod wilson;
 
+pub use kruskal::Kruskal;
+pub use recursive_backtracking::RecursiveBacktracking;
+pub use wilson::Wilson;
+
 pub trait MazeGenerator {
     fn generate(&self, maze: &mut Maze, screen: &mut dyn Write, animate: bool);
 }

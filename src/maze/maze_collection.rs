@@ -33,6 +33,7 @@ impl MazeCollection {
         screen: &mut dyn Write,
         animate: bool,
     ) {
+        self.mazes.iter_mut().for_each(|maze| maze.erase(screen));
         self.mazes
             .iter_mut()
             .for_each(|maze| maze.generate(generator, screen, animate));

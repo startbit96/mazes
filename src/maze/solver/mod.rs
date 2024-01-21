@@ -8,6 +8,10 @@ pub mod breadth_first_search;
 pub mod depth_first_search;
 pub mod wall_follower;
 
+pub use breadth_first_search::BreadthFirstSearch;
+pub use depth_first_search::DepthFirstSearch;
+pub use wall_follower::WallFollower;
+
 pub trait MazeSolver {
     fn solve(
         &self,

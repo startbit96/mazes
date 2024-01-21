@@ -4,5 +4,6 @@ pub mod draw;
 pub mod generator;
 pub mod maze;
 pub mod maze_collection;
+pub mod maze_container;
 pub mod path;
 pub mod solver;

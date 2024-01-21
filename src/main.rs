@@ -1,14 +1,9 @@
-use maze::generator::{
-    kruskal::Kruskal, recursive_backtracking::RecursiveBacktracking, wilson::Wilson,
-    MazeGenerationAlgorithms,
-};
+use maze::generator::{Kruskal, MazeGenerationAlgorithms, RecursiveBacktracking, Wilson};
 use maze::maze::Maze;
 use maze::maze_collection::MazeCollection;
+use maze::maze_container::MazeContainer;
 use maze::path::get_solving_sequence;
-use maze::solver::{
-    breadth_first_search::BreadthFirstSearch, depth_first_search::DepthFirstSearch,
-    wall_follower::WallFollower, MazeSolvingAlgorithms,
-};
+use maze::solver::{BreadthFirstSearch, DepthFirstSearch, MazeSolvingAlgorithms, WallFollower};
 use std::io::{stdin, stdout, Write};
 use terminal_ui::{TERMINAL_HEIGHT_MIN, TERMINAL_WIDTH_MIN};
 use termion::event::Key;
@@ -18,11 +13,6 @@ use termion::screen::{IntoAlternateScreen, ToAlternateScreen};
 
 mod maze;
 mod terminal_ui;
-
-pub enum MazeType {
-    SingleMaze(Maze),
-    MultipleMazes(MazeCollection),
-}
 
 fn main() {
     // Check if the terminal is large enough.
@@ -65,42 +55,24 @@ fn main() {
     // Initialize the maze with the information about its max size.
     let (max_maze_width, max_maze_height) = terminal_ui::get_max_draw_size();
     let mut maze_container =
-        MazeType::SingleMaze(Maze::new(max_maze_width, max_maze_height, (1, 1)));
+        MazeContainer::SingleMaze(Maze::new(max_maze_width, max_maze_height, (1, 1)));
 
     // Generate the first maze.
-    if let MazeType::SingleMaze(ref mut maze) = maze_container {
-        maze.generate(
-            match generation_algorithm {
-                MazeGenerationAlgorithms::Kruskal => &Kruskal,
-                MazeGenerationAlgorithms::RecursiveBacktracking => &RecursiveBacktracking,
-                MazeGenerationAlgorithms::Wilson => &Wilson,
-            },
-            &mut screen,
-            animate,
-        );
-        maze.draw(
-            &mut screen,
-            show_graph,
-            show_binary_representation,
-            show_background_binary_representation,
-        );
-    } else if let MazeType::MultipleMazes(ref mut maze_collection) = maze_container {
-        maze_collection.generate(
-            match generation_algorithm {
-                MazeGenerationAlgorithms::Kruskal => &Kruskal,
-                MazeGenerationAlgorithms::RecursiveBacktracking => &RecursiveBacktracking,
-                MazeGenerationAlgorithms::Wilson => &Wilson,
-            },
-            &mut screen,
-            animate,
-        );
-        maze_collection.draw(
-            &mut screen,
-            show_graph,
-            show_binary_representation,
-            show_background_binary_representation,
-        );
-    }
+    maze_container.generate(
+        match generation_algorithm {
+            MazeGenerationAlgorithms::Kruskal => &Kruskal,
+            MazeGenerationAlgorithms::RecursiveBacktracking => &RecursiveBacktracking,
+            MazeGenerationAlgorithms::Wilson => &Wilson,
+        },
+        &mut screen,
+        animate,
+    );
+    maze_container.draw(
+        &mut screen,
+        show_graph,
+        show_binary_representation,
+        show_background_binary_representation,
+    );
 
     // The main loop that keeps the program alive. q breaks it.
     for c in stdin.keys() {
@@ -119,188 +91,91 @@ fn main() {
                 );
                 terminal_ui::print_solving_sequence(&mut screen, String::new());
                 // Recreate.
-                if let MazeType::SingleMaze(ref mut maze) = maze_container {
-                    maze.generate(
-                        match generation_algorithm {
-                            MazeGenerationAlgorithms::Kruskal => &Kruskal,
-                            MazeGenerationAlgorithms::RecursiveBacktracking => {
-                                &RecursiveBacktracking
-                            }
-                            MazeGenerationAlgorithms::Wilson => &Wilson,
-                        },
-                        &mut screen,
-                        animate,
-                    );
-                    maze.draw(
-                        &mut screen,
-                        show_graph,
-                        show_binary_representation,
-                        show_background_binary_representation,
-                    );
-                } else if let MazeType::MultipleMazes(ref mut maze_collection) = maze_container {
-                    maze_collection.generate(
-                        match generation_algorithm {
-                            MazeGenerationAlgorithms::Kruskal => &Kruskal,
-                            MazeGenerationAlgorithms::RecursiveBacktracking => {
-                                &RecursiveBacktracking
-                            }
-                            MazeGenerationAlgorithms::Wilson => &Wilson,
-                        },
-                        &mut screen,
-                        animate,
-                    );
-                    maze_collection.draw(
-                        &mut screen,
-                        show_graph,
-                        show_binary_representation,
-                        show_background_binary_representation,
-                    );
-                }
+                maze_container.generate(
+                    match generation_algorithm {
+                        MazeGenerationAlgorithms::Kruskal => &Kruskal,
+                        MazeGenerationAlgorithms::RecursiveBacktracking => &RecursiveBacktracking,
+                        MazeGenerationAlgorithms::Wilson => &Wilson,
+                    },
+                    &mut screen,
+                    animate,
+                );
+                maze_container.draw(
+                    &mut screen,
+                    show_graph,
+                    show_binary_representation,
+                    show_background_binary_representation,
+                );
             }
             Key::Up | Key::Char('k') => {
                 // Increase size.
-                if let MazeType::SingleMaze(ref mut maze) = maze_container {
-                    if maze.change_size(maze.width + 2, maze.height + 2) {
-                        terminal_ui::erase_draw_area(&mut screen);
-                        // Generate without animation.
-                        maze.generate(
-                            match generation_algorithm {
-                                MazeGenerationAlgorithms::Kruskal => &Kruskal,
-                                MazeGenerationAlgorithms::RecursiveBacktracking => {
-                                    &RecursiveBacktracking
-                                }
-                                MazeGenerationAlgorithms::Wilson => &Wilson,
-                            },
-                            &mut screen,
-                            false,
-                        );
-                        maze.draw(
-                            &mut screen,
-                            show_graph,
-                            show_binary_representation,
-                            show_background_binary_representation,
-                        );
-
-                        // Reset the informations in the UI.
-                        terminal_ui::print_informations(
-                            &mut screen,
-                            generation_algorithm.to_string(),
-                            solving_algorithm.to_string(),
-                            0,
-                            animate,
-                        );
-                        terminal_ui::print_solving_sequence(&mut screen, String::new());
-                    }
-                } else if let MazeType::MultipleMazes(ref mut maze_collection) = maze_container {
-                    if maze_collection.change_size(
-                        maze_collection.mazes[0].width + 2,
-                        maze_collection.mazes[0].height + 2,
-                    ) {
-                        terminal_ui::erase_draw_area(&mut screen);
-                        // Generate without animation.
-                        maze_collection.generate(
-                            match generation_algorithm {
-                                MazeGenerationAlgorithms::Kruskal => &Kruskal,
-                                MazeGenerationAlgorithms::RecursiveBacktracking => {
-                                    &RecursiveBacktracking
-                                }
-                                MazeGenerationAlgorithms::Wilson => &Wilson,
-                            },
-                            &mut screen,
-                            false,
-                        );
-                        maze_collection.draw(
-                            &mut screen,
-                            show_graph,
-                            show_binary_representation,
-                            show_background_binary_representation,
-                        );
-                        // Reset the informations in the UI.
-                        terminal_ui::print_informations(
-                            &mut screen,
-                            generation_algorithm.to_string(),
-                            solving_algorithm.to_string(),
-                            0,
-                            animate,
-                        );
-                        terminal_ui::print_solving_sequence(&mut screen, String::new());
-                    }
+                if maze_container.change_size(2, 2) {
+                    terminal_ui::erase_draw_area(&mut screen);
+                    // Generate without animation.
+                    maze_container.generate(
+                        match generation_algorithm {
+                            MazeGenerationAlgorithms::Kruskal => &Kruskal,
+                            MazeGenerationAlgorithms::RecursiveBacktracking => {
+                                &RecursiveBacktracking
+                            }
+                            MazeGenerationAlgorithms::Wilson => &Wilson,
+                        },
+                        &mut screen,
+                        false,
+                    );
+                    maze_container.draw(
+                        &mut screen,
+                        show_graph,
+                        show_binary_representation,
+                        show_background_binary_representation,
+                    );
+                    // Reset the informations in the UI.
+                    terminal_ui::print_informations(
+                        &mut screen,
+                        generation_algorithm.to_string(),
+                        solving_algorithm.to_string(),
+                        0,
+                        animate,
+                    );
+                    terminal_ui::print_solving_sequence(&mut screen, String::new());
                 }
             }
             Key::Down | Key::Char('j') => {
                 // Decrease size.
-                if let MazeType::SingleMaze(ref mut maze) = maze_container {
-                    if maze.change_size(maze.width - 2, maze.height - 2) {
-                        terminal_ui::erase_draw_area(&mut screen);
-                        // Generate without animation.
-                        maze.generate(
-                            match generation_algorithm {
-                                MazeGenerationAlgorithms::Kruskal => &Kruskal,
-                                MazeGenerationAlgorithms::RecursiveBacktracking => {
-                                    &RecursiveBacktracking
-                                }
-                                MazeGenerationAlgorithms::Wilson => &Wilson,
-                            },
-                            &mut screen,
-                            false,
-                        );
-                        maze.draw(
-                            &mut screen,
-                            show_graph,
-                            show_binary_representation,
-                            show_background_binary_representation,
-                        );
-
-                        // Reset the informations in the UI.
-                        terminal_ui::print_informations(
-                            &mut screen,
-                            generation_algorithm.to_string(),
-                            solving_algorithm.to_string(),
-                            0,
-                            animate,
-                        );
-                        terminal_ui::print_solving_sequence(&mut screen, String::new());
-                    }
-                } else if let MazeType::MultipleMazes(ref mut maze_collection) = maze_container {
-                    if maze_collection.change_size(
-                        maze_collection.mazes[0].width - 2,
-                        maze_collection.mazes[0].height - 2,
-                    ) {
-                        terminal_ui::erase_draw_area(&mut screen);
-                        // Generate without animation.
-                        maze_collection.generate(
-                            match generation_algorithm {
-                                MazeGenerationAlgorithms::Kruskal => &Kruskal,
-                                MazeGenerationAlgorithms::RecursiveBacktracking => {
-                                    &RecursiveBacktracking
-                                }
-                                MazeGenerationAlgorithms::Wilson => &Wilson,
-                            },
-                            &mut screen,
-                            false,
-                        );
-                        maze_collection.draw(
-                            &mut screen,
-                            show_graph,
-                            show_binary_representation,
-                            show_background_binary_representation,
-                        );
-
-                        // Reset the informations in the UI.
-                        terminal_ui::print_informations(
-                            &mut screen,
-                            generation_algorithm.to_string(),
-                            solving_algorithm.to_string(),
-                            0,
-                            animate,
-                        );
-                        terminal_ui::print_solving_sequence(&mut screen, String::new());
-                    }
+                if maze_container.change_size(-2, -2) {
+                    terminal_ui::erase_draw_area(&mut screen);
+                    // Generate without animation.
+                    maze_container.generate(
+                        match generation_algorithm {
+                            MazeGenerationAlgorithms::Kruskal => &Kruskal,
+                            MazeGenerationAlgorithms::RecursiveBacktracking => {
+                                &RecursiveBacktracking
+                            }
+                            MazeGenerationAlgorithms::Wilson => &Wilson,
+                        },
+                        &mut screen,
+                        false,
+                    );
+                    maze_container.draw(
+                        &mut screen,
+                        show_graph,
+                        show_binary_representation,
+                        show_background_binary_representation,
+                    );
+                    // Reset the informations in the UI.
+                    terminal_ui::print_informations(
+                        &mut screen,
+                        generation_algorithm.to_string(),
+                        solving_algorithm.to_string(),
+                        0,
+                        animate,
+                    );
+                    terminal_ui::print_solving_sequence(&mut screen, String::new());
                 }
             }
             Key::Char('n') => {
                 // Set random start and end position for the maze. (only for single maze)
-                if let MazeType::SingleMaze(ref mut maze) = maze_container {
+                if let MazeContainer::SingleMaze(ref mut maze) = maze_container {
                     // Reset the informations in the UI.
                     terminal_ui::print_informations(
                         &mut screen,
@@ -323,7 +198,7 @@ fn main() {
             }
             Key::Char('m') => {
                 // Reset start and end position for the maze. (only for single maze)
-                if let MazeType::SingleMaze(ref mut maze) = maze_container {
+                if let MazeContainer::SingleMaze(ref mut maze) = maze_container {
                     // Reset the informations in the UI.
                     terminal_ui::print_informations(
                         &mut screen,
@@ -345,32 +220,16 @@ fn main() {
                 }
             }
             Key::Char('s') => {
-                let (path, number_of_inspected_cells) =
-                    if let MazeType::SingleMaze(ref maze) = maze_container {
-                        maze.solve(
-                            match solving_algorithm {
-                                MazeSolvingAlgorithms::BreadthFirstSearch => &BreadthFirstSearch,
+                let (path, number_of_inspected_cells) = maze_container.solve(
+                    match solving_algorithm {
+                        MazeSolvingAlgorithms::BreadthFirstSearch => &BreadthFirstSearch,
 
-                                MazeSolvingAlgorithms::DepthFirstSearch => &DepthFirstSearch,
-                                MazeSolvingAlgorithms::WallFollower => &WallFollower,
-                            },
-                            &mut screen,
-                            animate,
-                        )
-                    } else if let MazeType::MultipleMazes(ref maze_collection) = maze_container {
-                        maze_collection.solve(
-                            match solving_algorithm {
-                                MazeSolvingAlgorithms::BreadthFirstSearch => &BreadthFirstSearch,
-
-                                MazeSolvingAlgorithms::DepthFirstSearch => &DepthFirstSearch,
-                                MazeSolvingAlgorithms::WallFollower => &WallFollower,
-                            },
-                            &mut screen,
-                            animate,
-                        )
-                    } else {
-                        panic!()
-                    };
+                        MazeSolvingAlgorithms::DepthFirstSearch => &DepthFirstSearch,
+                        MazeSolvingAlgorithms::WallFollower => &WallFollower,
+                    },
+                    &mut screen,
+                    animate,
+                );
                 let solving_sequence = get_solving_sequence(&path);
                 let mut solving_sequence: String = solving_sequence.iter().collect();
                 if solving_sequence.len() == 0 {
@@ -399,43 +258,21 @@ fn main() {
                 );
                 terminal_ui::print_solving_sequence(&mut screen, String::new());
                 // Recreate (without animation).
-                if let MazeType::SingleMaze(ref mut maze) = maze_container {
-                    maze.generate(
-                        match generation_algorithm {
-                            MazeGenerationAlgorithms::Kruskal => &Kruskal,
-                            MazeGenerationAlgorithms::RecursiveBacktracking => {
-                                &RecursiveBacktracking
-                            }
-                            MazeGenerationAlgorithms::Wilson => &Wilson,
-                        },
-                        &mut screen,
-                        false,
-                    );
-                    maze.draw(
-                        &mut screen,
-                        show_graph,
-                        show_binary_representation,
-                        show_background_binary_representation,
-                    );
-                } else if let MazeType::MultipleMazes(ref mut maze_collection) = maze_container {
-                    maze_collection.generate(
-                        match generation_algorithm {
-                            MazeGenerationAlgorithms::Kruskal => &Kruskal,
-                            MazeGenerationAlgorithms::RecursiveBacktracking => {
-                                &RecursiveBacktracking
-                            }
-                            MazeGenerationAlgorithms::Wilson => &Wilson,
-                        },
-                        &mut screen,
-                        false,
-                    );
-                    maze_collection.draw(
-                        &mut screen,
-                        show_graph,
-                        show_binary_representation,
-                        show_background_binary_representation,
-                    );
-                }
+                maze_container.generate(
+                    match generation_algorithm {
+                        MazeGenerationAlgorithms::Kruskal => &Kruskal,
+                        MazeGenerationAlgorithms::RecursiveBacktracking => &RecursiveBacktracking,
+                        MazeGenerationAlgorithms::Wilson => &Wilson,
+                    },
+                    &mut screen,
+                    false,
+                );
+                maze_container.draw(
+                    &mut screen,
+                    show_graph,
+                    show_binary_representation,
+                    show_background_binary_representation,
+                );
             }
             Key::Char('l') => {
                 // Next solving algorithm.
@@ -450,21 +287,12 @@ fn main() {
                 );
                 terminal_ui::print_solving_sequence(&mut screen, String::new());
                 // Redraw the maze but do not solve it yet (may trigger the animation).
-                if let MazeType::SingleMaze(ref maze) = maze_container {
-                    maze.draw(
-                        &mut screen,
-                        show_graph,
-                        show_binary_representation,
-                        show_background_binary_representation,
-                    );
-                } else if let MazeType::MultipleMazes(ref maze_collection) = maze_container {
-                    maze_collection.draw(
-                        &mut screen,
-                        show_graph,
-                        show_binary_representation,
-                        show_background_binary_representation,
-                    );
-                }
+                maze_container.draw(
+                    &mut screen,
+                    show_graph,
+                    show_binary_representation,
+                    show_background_binary_representation,
+                );
             }
             Key::Char('g') => {
                 // Show / hide graph nodes.
@@ -473,21 +301,12 @@ fn main() {
                     show_binary_representation = false;
                     show_background_binary_representation = false;
                 }
-                if let MazeType::SingleMaze(ref maze) = maze_container {
-                    maze.draw(
-                        &mut screen,
-                        show_graph,
-                        show_binary_representation,
-                        show_background_binary_representation,
-                    );
-                } else if let MazeType::MultipleMazes(ref maze_collection) = maze_container {
-                    maze_collection.draw(
-                        &mut screen,
-                        show_graph,
-                        show_binary_representation,
-                        show_background_binary_representation,
-                    );
-                }
+                maze_container.draw(
+                    &mut screen,
+                    show_graph,
+                    show_binary_representation,
+                    show_background_binary_representation,
+                );
                 // Reset the informations in the UI.
                 terminal_ui::print_informations(
                     &mut screen,
@@ -527,21 +346,12 @@ fn main() {
                 if show_binary_representation {
                     show_graph = false;
                 }
-                if let MazeType::SingleMaze(ref maze) = maze_container {
-                    maze.draw(
-                        &mut screen,
-                        show_graph,
-                        show_binary_representation,
-                        show_background_binary_representation,
-                    );
-                } else if let MazeType::MultipleMazes(ref maze_collection) = maze_container {
-                    maze_collection.draw(
-                        &mut screen,
-                        show_graph,
-                        show_binary_representation,
-                        show_background_binary_representation,
-                    );
-                }
+                maze_container.draw(
+                    &mut screen,
+                    show_graph,
+                    show_binary_representation,
+                    show_background_binary_representation,
+                );
                 // Reset the informations in the UI.
                 terminal_ui::print_informations(
                     &mut screen,
@@ -554,7 +364,7 @@ fn main() {
             }
             Key::Char('1') => {
                 // Switch to a single maze.
-                if let MazeType::MultipleMazes(_) = maze_container {
+                if let MazeContainer::MultipleMazes(_) = maze_container {
                     // Reset the informations in the UI.
                     terminal_ui::erase_draw_area(&mut screen);
                     terminal_ui::print_informations(
@@ -584,20 +394,20 @@ fn main() {
                         show_binary_representation,
                         show_background_binary_representation,
                     );
-                    maze_container = MazeType::SingleMaze(maze);
+                    maze_container = MazeContainer::SingleMaze(maze);
                 }
             }
             Key::Char('2') | Key::Char('3') | Key::Char('4') | Key::Char('5') => {
                 if let Key::Char(number_of_mazes) = key {
                     let number_of_mazes = (number_of_mazes as u8 - b'0') as usize;
                     let maze_collection: Option<MazeCollection> =
-                        if let MazeType::SingleMaze(_) = maze_container {
+                        if let MazeContainer::SingleMaze(_) = maze_container {
                             Some(MazeCollection::new(
                                 max_maze_width,
                                 max_maze_height,
                                 number_of_mazes,
                             ))
-                        } else if let MazeType::MultipleMazes(ref mut old_maze_collection) =
+                        } else if let MazeContainer::MultipleMazes(ref mut old_maze_collection) =
                             maze_container
                         {
                             if old_maze_collection.number_of_mazes == number_of_mazes {
@@ -642,7 +452,7 @@ fn main() {
                             show_background_binary_representation,
                         );
 
-                        maze_container = MazeType::MultipleMazes(maze_collection);
+                        maze_container = MazeContainer::MultipleMazes(maze_collection);
                     }
                 }
             }

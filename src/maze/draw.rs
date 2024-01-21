@@ -107,7 +107,7 @@ pub fn draw_maze(screen: &mut dyn Write, maze: &Maze, show_graph: bool) {
     screen.flush().unwrap();
 }
 
-pub fn show_binary_representation(screen: &mut dyn Write, maze: &Maze, highlight_background: bool) {
+pub fn draw_binary_representation(screen: &mut dyn Write, maze: &Maze, highlight_background: bool) {
     erase_maze(screen, maze);
     let (maze_pos_x, maze_pos_y) = calculate_maze_position(maze);
     for row in 0..maze.height {
