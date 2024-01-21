@@ -24,12 +24,31 @@ const SYMBOL_MAZE_PATH_DEAD_END_LEFT: char = '╾';
 const SYMBOL_MAZE_PATH_DEAD_END_RIGHT: char = '╼';
 const SYMBOL_MAZE_PATH_SINGLE_POSITION: char = '╳';
 
+const MULTIPLE_MAZES_DRAW_DISTANCE: usize = 3;
+
 fn calculate_maze_position(maze: &Maze) -> (u16, u16) {
     let (terminal_width, terminal_height) = termion::terminal_size().unwrap();
-    return (
-        (terminal_width - maze.width as u16) / 2 + 1,
-        (terminal_height - maze.height as u16) / 2 + 1,
-    );
+    let y = (terminal_height - maze.height as u16) / 2 + 1;
+    let x = if maze.collection_position.1 % 2 == 1 {
+        // Odd number of mazes in this collection.
+        let idx_middle_maze = (maze.collection_position.1 + 1) / 2;
+        let pos_center = (terminal_width - maze.width as u16) / 2 + 1;
+        let idx_difference: isize =
+            -(idx_middle_maze as isize - maze.collection_position.0 as isize);
+        (pos_center as isize
+            + (idx_difference * (maze.width as isize + MULTIPLE_MAZES_DRAW_DISTANCE as isize)))
+            as u16
+    } else {
+        // Even number of mazes in this collection
+        let idx_middle_maze = (maze.collection_position.1 / 2) + 1;
+        let pos_center = terminal_width / 2 + 1;
+        let idx_difference: isize =
+            -(idx_middle_maze as isize - maze.collection_position.0 as isize);
+        (pos_center as isize
+            + (idx_difference * (maze.width as isize + MULTIPLE_MAZES_DRAW_DISTANCE as isize)))
+            as u16
+    };
+    return (x, y);
 }
 
 pub fn erase_maze(screen: &mut dyn Write, maze: &Maze) {

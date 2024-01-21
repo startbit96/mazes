@@ -12,6 +12,7 @@ const FORCE_SQUARE_MAZES: bool = true;
 pub const MAZE_VALUE_ACCESSIBLE: bool = false;
 pub const MAZE_VALUE_BLOCKED: bool = true;
 
+#[derive(Debug, Clone)]
 pub struct Maze {
     pub width: usize,
     pub height: usize,
@@ -21,11 +22,18 @@ pub struct Maze {
     pub max_height: usize,
     pub data: Vec<Vec<bool>>,
     pub is_node: Vec<Vec<bool>>,
+    pub collection_position: (usize, usize), // (pos, number of mazes), pos starts at 1
 }
 
 impl Maze {
-    pub fn new(max_width: usize, max_height: usize) -> Self {
+    pub fn new(max_width: usize, max_height: usize, collection_position: (usize, usize)) -> Self {
         // The max width and max height are were given by the terminal ui.
+        // If there is more than one maze, reduce the max width.
+        let max_width = match collection_position.1 {
+            0 => panic!(),
+            1 => max_width,
+            _ => max_width / collection_position.1 - (collection_position.1 - 1),
+        };
         // Make sure these numbers are odd.
         let max_width = match max_width % 2 {
             0 => max_width - 1,
@@ -43,6 +51,9 @@ impl Maze {
             width = width.min(height);
             height = width;
         }
+        if collection_position.0 < 1 || collection_position.0 > collection_position.1 {
+            panic!();
+        }
         Maze {
             width,
             height,
@@ -52,6 +63,7 @@ impl Maze {
             max_height,
             data: vec![vec![MAZE_VALUE_BLOCKED; height]; height],
             is_node: vec![vec![false; width]; height],
+            collection_position,
         }
     }
 
@@ -184,6 +196,10 @@ impl Maze {
 
     pub fn erase(&self, screen: &mut dyn Write) {
         erase_maze(screen, self);
+    }
+
+    pub fn show_binary_representation(&self, screen: &mut dyn Write) {
+        show_binary_representation(screen, self);
     }
 
     pub fn generate_graph(&mut self) {
