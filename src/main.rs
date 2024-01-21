@@ -78,7 +78,12 @@ fn main() {
             &mut screen,
             animate,
         );
-        maze.draw(&mut screen, show_graph);
+        maze.draw(
+            &mut screen,
+            show_graph,
+            show_binary_representation,
+            show_background_binary_representation,
+        );
     } else if let MazeType::MultipleMazes(ref mut maze_collection) = maze_container {
         maze_collection.generate(
             match generation_algorithm {
@@ -89,7 +94,12 @@ fn main() {
             &mut screen,
             animate,
         );
-        maze_collection.draw(&mut screen, show_graph);
+        maze_collection.draw(
+            &mut screen,
+            show_graph,
+            show_binary_representation,
+            show_background_binary_representation,
+        );
     }
 
     // The main loop that keeps the program alive. q breaks it.
@@ -121,7 +131,12 @@ fn main() {
                         &mut screen,
                         animate,
                     );
-                    maze.draw(&mut screen, show_graph);
+                    maze.draw(
+                        &mut screen,
+                        show_graph,
+                        show_binary_representation,
+                        show_background_binary_representation,
+                    );
                 } else if let MazeType::MultipleMazes(ref mut maze_collection) = maze_container {
                     maze_collection.generate(
                         match generation_algorithm {
@@ -134,7 +149,12 @@ fn main() {
                         &mut screen,
                         animate,
                     );
-                    maze_collection.draw(&mut screen, show_graph);
+                    maze_collection.draw(
+                        &mut screen,
+                        show_graph,
+                        show_binary_representation,
+                        show_background_binary_representation,
+                    );
                 }
             }
             Key::Up | Key::Char('k') => {
@@ -154,7 +174,13 @@ fn main() {
                             &mut screen,
                             false,
                         );
-                        maze.draw(&mut screen, show_graph);
+                        maze.draw(
+                            &mut screen,
+                            show_graph,
+                            show_binary_representation,
+                            show_background_binary_representation,
+                        );
+
                         // Reset the informations in the UI.
                         terminal_ui::print_informations(
                             &mut screen,
@@ -183,7 +209,12 @@ fn main() {
                             &mut screen,
                             false,
                         );
-                        maze_collection.draw(&mut screen, show_graph);
+                        maze_collection.draw(
+                            &mut screen,
+                            show_graph,
+                            show_binary_representation,
+                            show_background_binary_representation,
+                        );
                         // Reset the informations in the UI.
                         terminal_ui::print_informations(
                             &mut screen,
@@ -213,7 +244,13 @@ fn main() {
                             &mut screen,
                             false,
                         );
-                        maze.draw(&mut screen, show_graph);
+                        maze.draw(
+                            &mut screen,
+                            show_graph,
+                            show_binary_representation,
+                            show_background_binary_representation,
+                        );
+
                         // Reset the informations in the UI.
                         terminal_ui::print_informations(
                             &mut screen,
@@ -242,7 +279,13 @@ fn main() {
                             &mut screen,
                             false,
                         );
-                        maze_collection.draw(&mut screen, show_graph);
+                        maze_collection.draw(
+                            &mut screen,
+                            show_graph,
+                            show_binary_representation,
+                            show_background_binary_representation,
+                        );
+
                         // Reset the informations in the UI.
                         terminal_ui::print_informations(
                             &mut screen,
@@ -270,7 +313,12 @@ fn main() {
                     // Make the start and end position random.
                     maze.set_random_start_end_position();
                     // Redraw.
-                    maze.draw(&mut screen, show_graph);
+                    maze.draw(
+                        &mut screen,
+                        show_graph,
+                        show_binary_representation,
+                        show_background_binary_representation,
+                    );
                 }
             }
             Key::Char('m') => {
@@ -288,7 +336,12 @@ fn main() {
                     // Reset the start and end position.
                     maze.reset_start_end_position();
                     // Redraw.
-                    maze.draw(&mut screen, show_graph);
+                    maze.draw(
+                        &mut screen,
+                        show_graph,
+                        show_binary_representation,
+                        show_background_binary_representation,
+                    );
                 }
             }
             Key::Char('s') => {
@@ -358,7 +411,12 @@ fn main() {
                         &mut screen,
                         false,
                     );
-                    maze.draw(&mut screen, show_graph);
+                    maze.draw(
+                        &mut screen,
+                        show_graph,
+                        show_binary_representation,
+                        show_background_binary_representation,
+                    );
                 } else if let MazeType::MultipleMazes(ref mut maze_collection) = maze_container {
                     maze_collection.generate(
                         match generation_algorithm {
@@ -371,7 +429,12 @@ fn main() {
                         &mut screen,
                         false,
                     );
-                    maze_collection.draw(&mut screen, show_graph);
+                    maze_collection.draw(
+                        &mut screen,
+                        show_graph,
+                        show_binary_representation,
+                        show_background_binary_representation,
+                    );
                 }
             }
             Key::Char('l') => {
@@ -388,18 +451,42 @@ fn main() {
                 terminal_ui::print_solving_sequence(&mut screen, String::new());
                 // Redraw the maze but do not solve it yet (may trigger the animation).
                 if let MazeType::SingleMaze(ref maze) = maze_container {
-                    maze.draw(&mut screen, show_graph);
+                    maze.draw(
+                        &mut screen,
+                        show_graph,
+                        show_binary_representation,
+                        show_background_binary_representation,
+                    );
                 } else if let MazeType::MultipleMazes(ref maze_collection) = maze_container {
-                    maze_collection.draw(&mut screen, show_graph);
+                    maze_collection.draw(
+                        &mut screen,
+                        show_graph,
+                        show_binary_representation,
+                        show_background_binary_representation,
+                    );
                 }
             }
             Key::Char('g') => {
                 // Show / hide graph nodes.
                 show_graph = !show_graph;
+                if show_graph {
+                    show_binary_representation = false;
+                    show_background_binary_representation = false;
+                }
                 if let MazeType::SingleMaze(ref maze) = maze_container {
-                    maze.draw(&mut screen, show_graph);
+                    maze.draw(
+                        &mut screen,
+                        show_graph,
+                        show_binary_representation,
+                        show_background_binary_representation,
+                    );
                 } else if let MazeType::MultipleMazes(ref maze_collection) = maze_container {
-                    maze_collection.draw(&mut screen, show_graph);
+                    maze_collection.draw(
+                        &mut screen,
+                        show_graph,
+                        show_binary_representation,
+                        show_background_binary_representation,
+                    );
                 }
                 // Reset the informations in the UI.
                 terminal_ui::print_informations(
@@ -437,24 +524,23 @@ fn main() {
                     (true, true) => (false, false),
                     _ => unreachable!(),
                 };
+                if show_binary_representation {
+                    show_graph = false;
+                }
                 if let MazeType::SingleMaze(ref maze) = maze_container {
-                    if show_binary_representation {
-                        maze.show_binary_representation(
-                            &mut screen,
-                            show_background_binary_representation,
-                        );
-                    } else {
-                        maze.draw(&mut screen, show_graph);
-                    }
+                    maze.draw(
+                        &mut screen,
+                        show_graph,
+                        show_binary_representation,
+                        show_background_binary_representation,
+                    );
                 } else if let MazeType::MultipleMazes(ref maze_collection) = maze_container {
-                    if show_binary_representation {
-                        maze_collection.show_binary_representation(
-                            &mut screen,
-                            show_background_binary_representation,
-                        );
-                    } else {
-                        maze_collection.draw(&mut screen, show_graph);
-                    }
+                    maze_collection.draw(
+                        &mut screen,
+                        show_graph,
+                        show_binary_representation,
+                        show_background_binary_representation,
+                    );
                 }
                 // Reset the informations in the UI.
                 terminal_ui::print_informations(
@@ -492,7 +578,12 @@ fn main() {
                         &mut screen,
                         animate,
                     );
-                    maze.draw(&mut screen, show_graph);
+                    maze.draw(
+                        &mut screen,
+                        show_graph,
+                        show_binary_representation,
+                        show_background_binary_representation,
+                    );
                     maze_container = MazeType::SingleMaze(maze);
                 }
             }
@@ -544,7 +635,13 @@ fn main() {
                             &mut screen,
                             animate,
                         );
-                        maze_collection.draw(&mut screen, show_graph);
+                        maze_collection.draw(
+                            &mut screen,
+                            show_graph,
+                            show_binary_representation,
+                            show_background_binary_representation,
+                        );
+
                         maze_container = MazeType::MultipleMazes(maze_collection);
                     }
                 }

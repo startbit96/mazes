@@ -54,15 +54,20 @@ impl MazeCollection {
         )
     }
 
-    pub fn draw(&self, screen: &mut dyn Write, show_graph: bool) {
-        self.mazes
-            .iter()
-            .for_each(|maze| maze.draw(screen, show_graph));
-    }
-
-    pub fn show_binary_representation(&self, screen: &mut dyn Write, highlight_background: bool) {
-        self.mazes
-            .iter()
-            .for_each(|maze| maze.show_binary_representation(screen, highlight_background));
+    pub fn draw(
+        &self,
+        screen: &mut dyn Write,
+        show_graph: bool,
+        show_binary_presentation: bool,
+        highlight_binary_presentation: bool,
+    ) {
+        self.mazes.iter().for_each(|maze| {
+            maze.draw(
+                screen,
+                show_graph,
+                show_binary_presentation,
+                highlight_binary_presentation,
+            )
+        });
     }
 }
