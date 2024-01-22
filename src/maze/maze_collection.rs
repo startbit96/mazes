@@ -167,4 +167,15 @@ impl MazeCollection {
             )
         });
     }
+
+    pub fn reorder(&mut self) {
+        self.mazes
+            .iter_mut()
+            .for_each(|maze| maze.reset_start_end_position());
+        self.mazes.rotate_left(1);
+        self.mazes
+            .iter_mut()
+            .enumerate()
+            .for_each(|(idx, maze)| maze.collection_position = (idx + 1, self.number_of_mazes));
+    }
 }

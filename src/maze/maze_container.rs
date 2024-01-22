@@ -77,4 +77,10 @@ impl MazeContainer {
             panic!()
         }
     }
+
+    pub fn reorder(&mut self) {
+        if let MazeContainer::MultipleMazes(ref mut maze_collection) = self {
+            maze_collection.reorder();
+        }
+    }
 }

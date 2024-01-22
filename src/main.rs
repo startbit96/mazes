@@ -456,6 +456,17 @@ fn main() {
                     }
                 }
             }
+            Key::Char('o') => {
+                // Reorder the mazes in the maze collection (to show that the order
+                // of the mazes has an effect on the length of the solving sequence).
+                maze_container.reorder();
+                maze_container.draw(
+                    &mut screen,
+                    show_graph,
+                    show_binary_representation,
+                    show_background_binary_representation,
+                );
+            }
             _ => {}
         }
         screen.flush().unwrap();
