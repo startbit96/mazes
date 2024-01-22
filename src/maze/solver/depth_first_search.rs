@@ -48,10 +48,10 @@ impl MazeSolver for DepthFirstSearch {
                 ]
             } else {
                 vec![
-                    AbsoluteDirection::Up,
-                    AbsoluteDirection::Left,
-                    AbsoluteDirection::Down,
                     AbsoluteDirection::Right,
+                    AbsoluteDirection::Down,
+                    AbsoluteDirection::Left,
+                    AbsoluteDirection::Up,
                 ]
             };
 
