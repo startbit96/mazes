@@ -65,17 +65,32 @@ pub fn get_solving_sequence(path: &Vec<(usize, usize)>) -> Vec<char> {
         .collect()
 }
 
+pub fn apply_step(
+    maze: &Maze,
+    pos_start: (usize, usize),
+    solving_sequence_step: char,
+) -> (usize, usize) {
+    let direction = AbsoluteDirection::from_char(solving_sequence_step);
+    let pos_next = direction.apply(pos_start);
+    if maze.is_accessible(pos_next) {
+        return pos_next;
+    } else {
+        return pos_start;
+    }
+}
+
 pub fn apply_solving_sequence(
     maze: &Maze,
     pos_start: (usize, usize),
     solving_sequence: Vec<char>,
 ) -> Vec<(usize, usize)> {
+    // Returns the path filtered by "useless" steps.
+    // The last value in the path is the resulting position.
     let mut pos = pos_start;
     let mut path = vec![pos_start];
     for &c in solving_sequence.iter() {
-        let direction = AbsoluteDirection::from_char(c);
-        let pos_next = direction.apply(pos);
-        if maze.is_accessible(pos_next) {
+        let pos_next = apply_step(maze, pos, c);
+        if pos_next != pos {
             pos = pos_next;
             path.push(pos_next);
         }

@@ -15,7 +15,7 @@ pub use wall_follower::WallFollower;
 pub trait MazeSolver {
     fn solve(
         &self,
-        maze: &Maze,
+        maze: &mut Maze,
         screen: &mut dyn Write,
         animate: bool,
     ) -> (Vec<(usize, usize)>, usize);

@@ -10,7 +10,7 @@ pub struct DepthFirstSearch;
 impl MazeSolver for DepthFirstSearch {
     fn solve(
         &self,
-        maze: &Maze,
+        maze: &mut Maze,
         screen: &mut dyn std::io::Write,
         animate: bool,
     ) -> (Vec<(usize, usize)>, usize) {

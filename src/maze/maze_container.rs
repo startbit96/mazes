@@ -24,14 +24,14 @@ impl MazeContainer {
     }
 
     pub fn solve(
-        &self,
+        &mut self,
         solver: &dyn MazeSolver,
         screen: &mut dyn Write,
         animate: bool,
     ) -> (Vec<(usize, usize)>, usize) {
-        if let MazeContainer::SingleMaze(ref maze) = self {
+        if let MazeContainer::SingleMaze(ref mut maze) = self {
             maze.solve(solver, screen, animate)
-        } else if let MazeContainer::MultipleMazes(ref maze_collection) = self {
+        } else if let MazeContainer::MultipleMazes(ref mut maze_collection) = self {
             maze_collection.solve(solver, screen, animate)
         } else {
             panic!()

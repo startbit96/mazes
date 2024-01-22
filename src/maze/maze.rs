@@ -180,7 +180,7 @@ impl Maze {
     }
 
     pub fn solve(
-        &self,
+        &mut self,
         solver: &dyn MazeSolver,
         screen: &mut dyn Write,
         animate: bool,

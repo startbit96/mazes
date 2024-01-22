@@ -10,7 +10,7 @@ pub struct BreadthFirstSearch;
 impl MazeSolver for BreadthFirstSearch {
     fn solve(
         &self,
-        maze: &Maze,
+        maze: &mut Maze,
         screen: &mut dyn std::io::Write,
         animate: bool,
     ) -> (Vec<(usize, usize)>, usize) {

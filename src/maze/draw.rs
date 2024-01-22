@@ -5,8 +5,9 @@ use std::io::Write;
 pub const SYMBOL_MAZE_FIELD_ACCESSIBLE: char = ' ';
 pub const SYMBOL_MAZE_FIELD_BLOCKED: char = '█';
 const SYMBOL_MAZE_ERASED: char = ' ';
-const SYMBOL_MAZE_POS_START: char = 'S';
-const SYMBOL_MAZE_POS_END: char = 'E';
+pub const SYMBOL_MAZE_POS_START: char = 'S';
+pub const SYMBOL_MAZE_POS_END: char = 'E';
+pub const SYMBOL_MAZE_POS_CURRENT: char = '⊗';
 
 const SYMBOL_MAZE_GRAPH_NODE: char = '◉';
 const SYMBOL_MAZE_GRAPH_CONNECTION_HORIZONTAL: char = '─';
