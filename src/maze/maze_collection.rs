@@ -70,7 +70,11 @@ impl MazeCollection {
             // Solve the maze.
             let (mut sub_path, sub_inspected_cells) =
                 self.mazes[idx].solve(solver, screen, animate);
-            current_positions[idx] = self.mazes[idx].pos_end;
+            // Wait a little bit and then redraw the maze.
+            for _ in 0..5 {
+                delay(SOLVING_DELAY);
+            }
+            self.mazes[idx].draw(screen, false, false, false);
             // In order to later create the solving sequence, the consecutive positions
             // are only allowed to be one step away from eachother. So we need to move
             // the points from this path a little bit.
@@ -79,10 +83,10 @@ impl MazeCollection {
             // Apply the solving sequence to all previous mazes and update their resulting position.
             // Apply the solving sequence to all upcoming mazes and update their start position.
             let solving_sequence = get_solving_sequence(&sub_path);
-            for (idx_c, c) in solving_sequence.iter().enumerate() {
+            for c in solving_sequence.iter() {
                 for idx_other in 0..self.mazes.len() {
                     if idx == idx_other {
-                        continue;
+                        draw_path(screen, &self.mazes[idx], sub_path.clone(), false);
                     }
                     let direction = AbsoluteDirection::from_char(*c);
                     let pos_next =
@@ -114,6 +118,7 @@ impl MazeCollection {
                     }
                 }
             }
+            // Update the start position of the upcoming mazes.
             for idx_other in (idx + 1)..self.mazes.len() {
                 self.mazes[idx_other].pos_start = current_positions[idx_other];
                 self.mazes[idx_other].draw(screen, false, false, false);

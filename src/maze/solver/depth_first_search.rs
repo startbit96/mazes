@@ -30,7 +30,7 @@ impl MazeSolver for DepthFirstSearch {
             inspected_cells.insert(pos);
             highlight_cell(screen, maze, pos);
             if pos == maze.pos_end {
-                draw_path(screen, maze, path.clone());
+                draw_path(screen, maze, path.clone(), true);
                 return (path, inspected_cells.len());
             }
             if animate {

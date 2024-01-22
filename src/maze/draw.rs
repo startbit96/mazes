@@ -226,15 +226,17 @@ pub fn draw_character(
     screen.flush().unwrap();
 }
 
-pub fn draw_path(screen: &mut dyn Write, maze: &Maze, path: Vec<(usize, usize)>) {
+pub fn draw_path(screen: &mut dyn Write, maze: &Maze, path: Vec<(usize, usize)>, highlight: bool) {
     let path = complete_path(path);
-    write!(
-        screen,
-        "{}{}",
-        termion::color::Fg(termion::color::Black),
-        termion::color::Bg(termion::color::LightBlue)
-    )
-    .unwrap();
+    if highlight {
+        write!(
+            screen,
+            "{}{}",
+            termion::color::Fg(termion::color::Black),
+            termion::color::Bg(termion::color::LightBlue)
+        )
+        .unwrap();
+    }
     path.iter().enumerate().for_each(|(idx, pos)| {
         let pos_prev = if idx > 0 { path[idx - 1] } else { *pos };
         let pos_next = if idx < path.len() - 1 {
@@ -296,14 +298,15 @@ pub fn draw_path(screen: &mut dyn Write, maze: &Maze, path: Vec<(usize, usize)>)
             false,
         );
     });
-    write!(
-        screen,
-        "{}{}",
-        termion::color::Fg(termion::color::Reset),
-        termion::color::Bg(termion::color::Reset)
-    )
-    .unwrap();
-
+    if highlight {
+        write!(
+            screen,
+            "{}{}",
+            termion::color::Fg(termion::color::Reset),
+            termion::color::Bg(termion::color::Reset)
+        )
+        .unwrap();
+    }
     screen.flush().unwrap();
 }
 
