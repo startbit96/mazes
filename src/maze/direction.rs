@@ -24,7 +24,10 @@ impl AbsoluteDirection {
             (1, 0) => AbsoluteDirection::Right,
             (0, -1) => AbsoluteDirection::Up,
             (0, 1) => AbsoluteDirection::Down,
-            _ => panic!("Only one step per time is supported."),
+            _ => panic!(
+                "Only one step per time is supported (input is from {:?} to {:?}).",
+                pos_from, pos_to
+            ),
         }
     }
 

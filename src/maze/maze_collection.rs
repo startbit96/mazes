@@ -71,15 +71,12 @@ impl MazeCollection {
             let (mut sub_path, sub_inspected_cells) =
                 self.mazes[idx].solve(solver, screen, animate);
             // Wait a little bit and then redraw the maze.
-            for _ in 0..5 {
-                delay(SOLVING_DELAY);
+            if animate {
+                for _ in 0..5 {
+                    delay(SOLVING_DELAY);
+                }
             }
             self.mazes[idx].draw(screen, false, false, false);
-            // In order to later create the solving sequence, the consecutive positions
-            // are only allowed to be one step away from eachother. So we need to move
-            // the points from this path a little bit.
-            //path.append(&mut sub_path.clone());
-            number_of_inspected_cells += sub_inspected_cells;
             // Apply the solving sequence to all previous mazes and update their resulting position.
             // Apply the solving sequence to all upcoming mazes and update their start position.
             let solving_sequence = get_solving_sequence(&sub_path);
@@ -123,6 +120,22 @@ impl MazeCollection {
                 self.mazes[idx_other].pos_start = current_positions[idx_other];
                 self.mazes[idx_other].draw(screen, false, false, false);
             }
+            // In order to later create the solving sequence, the consecutive positions
+            // are only allowed to be one step away from eachother. So we need to move
+            // the points from this path a little bit.
+            if idx > 0 {
+                pos_shift = (
+                    pos_shift.0 + (self.mazes[idx - 1].pos_end.0 - self.mazes[idx].pos_start.0),
+                    pos_shift.1 + (self.mazes[idx - 1].pos_end.1 - self.mazes[idx].pos_start.1),
+                );
+                // Also remove the first one.
+                sub_path.remove(0);
+            }
+            sub_path
+                .iter_mut()
+                .for_each(|pos| *pos = (pos.0 + pos_shift.0, pos.1 + pos_shift.1));
+            path.append(&mut sub_path.clone());
+            number_of_inspected_cells += sub_inspected_cells;
         }
         // At the end, redraw all mazes and mark the final position.
         self.draw(screen, false, false, false);
