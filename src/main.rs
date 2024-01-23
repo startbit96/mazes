@@ -3,7 +3,9 @@ use maze::maze::Maze;
 use maze::maze_collection::MazeCollection;
 use maze::maze_container::MazeContainer;
 use maze::path::get_solving_sequence;
-use maze::solver::{BreadthFirstSearch, DepthFirstSearch, MazeSolvingAlgorithms, WallFollower};
+use maze::solver::{
+    AStar, BreadthFirstSearch, DepthFirstSearch, MazeSolvingAlgorithms, WallFollower,
+};
 use std::io::{stdin, stdout, Write};
 use terminal_ui::{TERMINAL_HEIGHT_MIN, TERMINAL_WIDTH_MIN};
 use termion::event::Key;
@@ -235,6 +237,7 @@ fn main() {
                 }
                 let (path, number_of_inspected_cells) = maze_container.solve(
                     match solving_algorithm {
+                        MazeSolvingAlgorithms::AStar => &AStar,
                         MazeSolvingAlgorithms::BreadthFirstSearch => &BreadthFirstSearch,
 
                         MazeSolvingAlgorithms::DepthFirstSearch => &DepthFirstSearch,

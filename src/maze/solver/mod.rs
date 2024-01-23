@@ -2,12 +2,14 @@ use crate::maze::animation::Delay;
 use crate::maze::maze::Maze;
 use std::io::Write;
 
-pub const SOLVING_DELAY: Delay = Delay::Long;
+pub const SOLVING_DELAY: Delay = Delay::Middle;
 
+pub mod a_star;
 pub mod breadth_first_search;
 pub mod depth_first_search;
 pub mod wall_follower;
 
+pub use a_star::AStar;
 pub use breadth_first_search::BreadthFirstSearch;
 pub use depth_first_search::DepthFirstSearch;
 pub use wall_follower::WallFollower;
@@ -23,6 +25,7 @@ pub trait MazeSolver {
 
 #[derive(Debug, PartialEq, Eq)]
 pub enum MazeSolvingAlgorithms {
+    AStar,
     BreadthFirstSearch,
     DepthFirstSearch,
     WallFollower,
@@ -31,14 +34,16 @@ pub enum MazeSolvingAlgorithms {
 impl MazeSolvingAlgorithms {
     pub fn next(&self) -> Self {
         match self {
+            Self::AStar => Self::BreadthFirstSearch,
             Self::BreadthFirstSearch => Self::DepthFirstSearch,
             Self::DepthFirstSearch => Self::WallFollower,
-            Self::WallFollower => Self::BreadthFirstSearch,
+            Self::WallFollower => Self::AStar,
         }
     }
 
     pub fn to_string(&self) -> &str {
         match self {
+            Self::AStar => "A*",
             Self::BreadthFirstSearch => "BFS",
             Self::DepthFirstSearch => "DFS",
             Self::WallFollower => "wall follower",

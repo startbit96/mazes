@@ -97,3 +97,7 @@ pub fn apply_solving_sequence(
     }
     path
 }
+
+pub fn calculate_manhattan_distance(pos1: (usize, usize), pos2: (usize, usize)) -> usize {
+    pos1.0.abs_diff(pos2.0) + pos1.1.abs_diff(pos2.1)
+}
