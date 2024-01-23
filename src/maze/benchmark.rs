@@ -5,15 +5,15 @@ use crate::maze::path::calculate_manhattan_distance;
 use crate::maze::solver::*;
 use std::collections::HashMap;
 use std::fs::File;
-use std::io::{self, BufWriter, Write};
+use std::io::Write;
 
-const BENCHMARK_NUMBER_OF_MAZES_PER_GENERATION_ALGORITHM: usize = 5;
-const BENCHMARK_NUMBER_OF_RANDOM_POSITIONS_PER_MAZE: usize = 10;
+const BENCHMARK_NUMBER_OF_MAZES_PER_GENERATION_ALGORITHM: usize = 100;
+const BENCHMARK_NUMBER_OF_RANDOM_POSITIONS_PER_MAZE: usize = 100;
 
 pub struct BenchmarkResult {
     pub maze_id: usize,
     pub generation_algorithm: String,
-    pub manhattan_distance_start_end: usize,
+    pub manhattan_distance: usize,
     pub inspected_cells_per_solving_algorithm: HashMap<String, usize>,
 }
 
@@ -40,7 +40,6 @@ impl BenchmarkResultCollection {
                 };
                 maze.generate(*generation_algorithm, screen, false);
                 for i in 0..=BENCHMARK_NUMBER_OF_RANDOM_POSITIONS_PER_MAZE {
-                    maze.draw(screen, false, false, false, false);
                     if i > 0 {
                         maze.set_random_start_end_position();
                     }
@@ -56,13 +55,12 @@ impl BenchmarkResultCollection {
                     results.push(BenchmarkResult {
                         maze_id,
                         generation_algorithm: generation_algorithm.to_string(),
-                        manhattan_distance_start_end: calculate_manhattan_distance(
+                        manhattan_distance: calculate_manhattan_distance(
                             maze.pos_start,
                             maze.pos_end,
                         ),
                         inspected_cells_per_solving_algorithm,
                     });
-                    delay(Delay::Short);
                 }
                 maze_id += 1;
             }
@@ -77,7 +75,7 @@ impl BenchmarkResultCollection {
 
     pub fn to_csv(&self) -> String {
         let filename = format!(
-            "maze_benchmark_size_{}x{}_{}_mazes_{}_random_positions.csv",
+            "benchmark_analysis/maze_benchmark_size_{}x{}_{}_mazes_{}_random_positions.csv",
             self.maze_width,
             self.maze_height,
             BENCHMARK_NUMBER_OF_MAZES_PER_GENERATION_ALGORITHM,
@@ -85,7 +83,7 @@ impl BenchmarkResultCollection {
         );
         let mut file = File::create(filename.clone()).unwrap();
         // Header.
-        file.write_all(b"maze_id; generation_algorithm; manhattan_distance_start_end; ")
+        file.write_all(b"maze_id;generation_algorithm;manhattan_distance")
             .unwrap();
         let solving_algorithms: Vec<String> = self.results[0]
             .inspected_cells_per_solving_algorithm
@@ -93,22 +91,16 @@ impl BenchmarkResultCollection {
             .cloned()
             .collect();
         for solving_algorithm in solving_algorithms.iter() {
-            file.write_all(
-                format!("inspected_cells_{}; ", solving_algorithm)
-                    .into_bytes()
-                    .as_slice(),
-            )
-            .unwrap();
+            file.write_all(format!(";{}", solving_algorithm).into_bytes().as_slice())
+                .unwrap();
         }
         file.write_all(b"\n").unwrap();
         // Write all measurements into the csv file.
         for result in self.results.iter() {
             file.write_all(
                 format!(
-                    "{}; {}; {}; ",
-                    result.maze_id,
-                    result.generation_algorithm,
-                    result.manhattan_distance_start_end
+                    "{};{};{}",
+                    result.maze_id, result.generation_algorithm, result.manhattan_distance
                 )
                 .into_bytes()
                 .as_slice(),
@@ -117,7 +109,7 @@ impl BenchmarkResultCollection {
             for solving_algorithm in solving_algorithms.iter() {
                 file.write_all(
                     format!(
-                        "{}; ",
+                        ";{}",
                         result
                             .inspected_cells_per_solving_algorithm
                             .get(solving_algorithm)

@@ -15,6 +15,15 @@
           rust-analyzer
           clippy
           libiconv # https://stackoverflow.com/questions/68679040/error-linking-with-cc-failed-exit-code-1-for-cargo-run
+          # for the analysis of the benchmark results:
+          (python3.withPackages (ps: with ps; with python3Packages; [
+            jupyter
+            ipython
+            pandas
+            numpy
+            matplotlib
+            seaborn
+          ]))
         ];
       };
       

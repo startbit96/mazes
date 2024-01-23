@@ -1,11 +1,12 @@
-/target
 .direnv
+.ipynb_checkpoints
 
 # Debug file sometimes used (cargo run 2>out)
 out
 
 # Benchmark results
 *.csv
+*.png
 
 # ----- RUST -----
 
