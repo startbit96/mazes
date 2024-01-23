@@ -21,7 +21,7 @@ pub trait MazeSolver {
     ) -> (Vec<(usize, usize)>, usize);
 }
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq, Eq)]
 pub enum MazeSolvingAlgorithms {
     BreadthFirstSearch,
     DepthFirstSearch,

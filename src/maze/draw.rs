@@ -30,6 +30,43 @@ const CHAR_MAZE_BLOCKED: char = '1';
 
 const MULTIPLE_MAZES_DRAW_DISTANCE: usize = 3;
 
+#[derive(Clone, Copy)]
+pub enum CellColorType {
+    InspectedCell,
+    CurrentCell,
+    Path,
+}
+
+impl CellColorType {
+    // https://coolors.co/palettes/trending
+    pub fn to_termion_color(&self) -> String {
+        match self {
+            Self::InspectedCell => {
+                let (r, g, b) = Self::termion_rgb_from_string(String::from("ffd166"));
+                format!("{}", termion::color::Bg(termion::color::Rgb(r, g, b)))
+            }
+            Self::CurrentCell => {
+                let (r, g, b) = Self::termion_rgb_from_string(String::from("ef476f"));
+                format!("{}", termion::color::Bg(termion::color::Rgb(r, g, b)))
+            }
+            Self::Path => {
+                let (r, g, b) = Self::termion_rgb_from_string(String::from("06d6a0"));
+                format!("{}", termion::color::Bg(termion::color::Rgb(r, g, b)))
+            }
+        }
+    }
+
+    pub fn termion_rgb_from_string(color_string: String) -> (u8, u8, u8) {
+        if color_string.len() != 6 {
+            panic!()
+        }
+        let r = u8::from_str_radix(&color_string[0..=1], 16).unwrap();
+        let g = u8::from_str_radix(&color_string[2..=3], 16).unwrap();
+        let b = u8::from_str_radix(&color_string[4..=5], 16).unwrap();
+        (r, g, b)
+    }
+}
+
 fn calculate_maze_position(maze: &Maze) -> (u16, u16) {
     let (terminal_width, terminal_height) = termion::terminal_size().unwrap();
     let y = (terminal_height - maze.height as u16) / 2 + 1;
@@ -155,13 +192,18 @@ pub fn draw_binary_representation(screen: &mut dyn Write, maze: &Maze, highlight
     screen.flush().unwrap();
 }
 
-pub fn highlight_cell(screen: &mut dyn Write, maze: &Maze, pos: (usize, usize)) {
+pub fn highlight_cell(
+    screen: &mut dyn Write,
+    maze: &Maze,
+    pos: (usize, usize),
+    color_type: CellColorType,
+) {
     let (maze_pos_x, maze_pos_y) = calculate_maze_position(maze);
     write!(
         screen,
         "{}{}{}{}",
         termion::cursor::Goto(maze_pos_x + pos.0 as u16, maze_pos_y + pos.1 as u16),
-        termion::color::Bg(termion::color::LightGreen),
+        color_type.to_termion_color(),
         if pos == maze.pos_start {
             SYMBOL_MAZE_POS_START
         } else if pos == maze.pos_end {
@@ -207,11 +249,11 @@ pub fn draw_character(
     maze: &Maze,
     pos: (usize, usize),
     character: char,
-    highlight: bool,
+    highlight: Option<CellColorType>,
 ) {
     let (maze_pos_x, maze_pos_y) = calculate_maze_position(maze);
-    if highlight {
-        write!(screen, "{}", termion::color::Bg(termion::color::LightGreen)).unwrap();
+    if let Some(highlight_color) = highlight {
+        write!(screen, "{}", highlight_color.to_termion_color()).unwrap();
     }
     write!(
         screen,
@@ -220,20 +262,25 @@ pub fn draw_character(
         character
     )
     .unwrap();
-    if highlight {
+    if let Some(_) = highlight {
         write!(screen, "{}", termion::color::Bg(termion::color::Reset)).unwrap();
     }
     screen.flush().unwrap();
 }
 
-pub fn draw_path(screen: &mut dyn Write, maze: &Maze, path: Vec<(usize, usize)>, highlight: bool) {
+pub fn draw_path(
+    screen: &mut dyn Write,
+    maze: &Maze,
+    path: Vec<(usize, usize)>,
+    highlight: Option<CellColorType>,
+) {
     let path = complete_path(path);
-    if highlight {
+    if let Some(highlight_color) = highlight {
         write!(
             screen,
             "{}{}",
             termion::color::Fg(termion::color::Black),
-            termion::color::Bg(termion::color::LightBlue)
+            highlight_color.to_termion_color()
         )
         .unwrap();
     }
@@ -295,10 +342,10 @@ pub fn draw_path(screen: &mut dyn Write, maze: &Maze, path: Vec<(usize, usize)>,
                     _ => '?',
                 }
             },
-            false,
+            None,
         );
     });
-    if highlight {
+    if let Some(_) = highlight {
         write!(
             screen,
             "{}{}",

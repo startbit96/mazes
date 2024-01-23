@@ -220,6 +220,12 @@ fn main() {
                 }
             }
             Key::Char('s') => {
+                if let MazeContainer::MultipleMazes(_) = maze_container {
+                    if solving_algorithm == MazeSolvingAlgorithms::WallFollower {
+                        terminal_ui::print_solving_sequence(&mut screen, String::from("For multiple mazes, the solving algorithm 'wall follower' is not supported. Please change the solving algorithm."));
+                        continue;
+                    }
+                }
                 let (path, number_of_inspected_cells) = maze_container.solve(
                     match solving_algorithm {
                         MazeSolvingAlgorithms::BreadthFirstSearch => &BreadthFirstSearch,
@@ -375,7 +381,7 @@ fn main() {
                         animate,
                     );
                     terminal_ui::print_solving_sequence(&mut screen, String::new());
-                    // Generate the maze and print it.
+                    // Generate the maze (without animation) and print it.
                     let mut maze = Maze::new(max_maze_width, max_maze_height, (1, 1));
                     maze.generate(
                         match generation_algorithm {
@@ -386,7 +392,7 @@ fn main() {
                             MazeGenerationAlgorithms::Wilson => &Wilson,
                         },
                         &mut screen,
-                        animate,
+                        false,
                     );
                     maze.draw(
                         &mut screen,
@@ -433,7 +439,7 @@ fn main() {
                             animate,
                         );
                         terminal_ui::print_solving_sequence(&mut screen, String::new());
-                        // Create the mazes and draw them.
+                        // Create the mazes without animation and draw them.
                         maze_collection.generate(
                             match generation_algorithm {
                                 MazeGenerationAlgorithms::Kruskal => &Kruskal,
@@ -443,7 +449,7 @@ fn main() {
                                 MazeGenerationAlgorithms::Wilson => &Wilson,
                             },
                             &mut screen,
-                            animate,
+                            false,
                         );
                         maze_collection.draw(
                             &mut screen,

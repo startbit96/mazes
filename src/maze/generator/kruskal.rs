@@ -37,13 +37,7 @@ impl MazeGenerator for Kruskal {
                 forest.push(vec![(row, col)]);
                 maze.data[row][col] = MAZE_VALUE_ACCESSIBLE;
                 if animate {
-                    draw_character(
-                        screen,
-                        maze,
-                        (col, row),
-                        SYMBOL_MAZE_FIELD_ACCESSIBLE,
-                        false,
-                    );
+                    draw_character(screen, maze, (col, row), SYMBOL_MAZE_FIELD_ACCESSIBLE, None);
                     delay(GENERATION_DELAY);
                     screen.flush().unwrap();
                 }

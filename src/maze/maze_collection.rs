@@ -1,4 +1,4 @@
-use crate::maze::animation::delay;
+use crate::maze::animation::*;
 use crate::maze::direction::AbsoluteDirection;
 use crate::maze::draw::*;
 use crate::maze::generator::MazeGenerator;
@@ -6,7 +6,6 @@ use crate::maze::maze::*;
 use crate::maze::path::apply_step;
 use crate::maze::path::get_solving_sequence;
 use crate::maze::solver::MazeSolver;
-use crate::maze::solver::SOLVING_DELAY;
 use std::io::Write;
 
 #[derive(Debug, Clone)]
@@ -72,9 +71,7 @@ impl MazeCollection {
                 self.mazes[idx].solve(solver, screen, animate);
             // Wait a little bit and then redraw the maze.
             if animate {
-                for _ in 0..5 {
-                    delay(SOLVING_DELAY);
-                }
+                delay(Delay::VeryLong);
             }
             self.mazes[idx].draw(screen, false, false, false);
             // Apply the solving sequence to all previous mazes and update their resulting position.
@@ -83,7 +80,7 @@ impl MazeCollection {
             for c in solving_sequence.iter() {
                 for idx_other in 0..self.mazes.len() {
                     if idx == idx_other {
-                        draw_path(screen, &self.mazes[idx], sub_path.clone(), false);
+                        draw_path(screen, &self.mazes[idx], sub_path.clone(), None);
                     }
                     let direction = AbsoluteDirection::from_char(*c);
                     let pos_next =
@@ -100,18 +97,18 @@ impl MazeCollection {
                         } else {
                             SYMBOL_MAZE_FIELD_ACCESSIBLE
                         },
-                        false,
+                        None,
                     );
                     draw_character(
                         screen,
                         &self.mazes[idx_other],
                         pos_next,
                         direction.to_symbol(),
-                        false,
+                        None,
                     );
                     current_positions[idx_other] = pos_next;
                     if animate {
-                        delay(SOLVING_DELAY);
+                        delay(Delay::Long);
                     }
                 }
             }
@@ -145,7 +142,7 @@ impl MazeCollection {
                 &self.mazes[idx],
                 current_positions[idx],
                 SYMBOL_MAZE_POS_CURRENT,
-                false,
+                None,
             );
         }
         (path, number_of_inspected_cells)

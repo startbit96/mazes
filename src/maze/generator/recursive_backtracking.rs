@@ -44,7 +44,7 @@ impl MazeGenerator for RecursiveBacktracking {
                 maze,
                 current_cell,
                 SYMBOL_MAZE_FIELD_ACCESSIBLE,
-                false,
+                None,
             );
             delay(GENERATION_DELAY);
             screen.flush().unwrap();
@@ -98,7 +98,7 @@ impl MazeGenerator for RecursiveBacktracking {
                         maze,
                         current_cell,
                         SYMBOL_MAZE_FIELD_ACCESSIBLE,
-                        false,
+                        None,
                     );
                     delay(GENERATION_DELAY);
                     screen.flush().unwrap();

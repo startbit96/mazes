@@ -1,6 +1,6 @@
 use crate::maze::animation::delay;
 use crate::maze::direction::{AbsoluteDirection, RelativeDirection};
-use crate::maze::draw::{draw_path, highlight_cell};
+use crate::maze::draw::{draw_path, highlight_cell, CellColorType};
 use crate::maze::maze::Maze;
 use crate::maze::solver::{MazeSolver, SOLVING_DELAY};
 use std::collections::{HashSet, VecDeque};
@@ -28,14 +28,15 @@ impl MazeSolver for BreadthFirstSearch {
         while !queue.is_empty() {
             let (pos, direction, path) = queue.pop_front().unwrap();
             inspected_cells.insert(pos);
-            highlight_cell(screen, maze, pos);
+            highlight_cell(screen, maze, pos, CellColorType::CurrentCell);
             if pos == maze.pos_end {
-                draw_path(screen, maze, path.clone(), true);
+                draw_path(screen, maze, path.clone(), Some(CellColorType::Path));
                 return (path, inspected_cells.len());
             }
             if animate {
                 delay(SOLVING_DELAY);
             }
+            highlight_cell(screen, maze, pos, CellColorType::InspectedCell);
             // From your current direction, first look right, forward and then left.
             // Never go back.
             let possible_directions: Vec<AbsoluteDirection> = if let Some(direction) = direction {

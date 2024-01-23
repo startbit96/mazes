@@ -1,6 +1,6 @@
 use crate::maze::animation::delay;
 use crate::maze::direction::{AbsoluteDirection, RelativeDirection};
-use crate::maze::draw::{draw_character, draw_path, highlight_cell};
+use crate::maze::draw::{draw_character, highlight_cell, CellColorType};
 use crate::maze::maze::Maze;
 use crate::maze::solver::{MazeSolver, SOLVING_DELAY};
 use std::collections::HashSet;
@@ -45,9 +45,15 @@ impl MazeSolver for WallFollower {
             }
             pos_current = direction.apply(pos_current);
             // Highlight the previous cell.
-            highlight_cell(screen, maze, pos_prev);
+            highlight_cell(screen, maze, pos_prev, CellColorType::InspectedCell);
             // Mark the current cell including the walking direction.
-            draw_character(screen, maze, pos_current, direction.to_symbol(), true);
+            draw_character(
+                screen,
+                maze,
+                pos_current,
+                direction.to_symbol(),
+                Some(CellColorType::CurrentCell),
+            );
             if animate {
                 delay(SOLVING_DELAY);
             }

@@ -39,13 +39,7 @@ impl MazeGenerator for Wilson {
         // Remove the starting cell from the unvisited cells.
         unvisited_cells.remove(&start_cell);
         if animate {
-            draw_character(
-                screen,
-                maze,
-                start_cell,
-                SYMBOL_MAZE_FIELD_ACCESSIBLE,
-                false,
-            );
+            draw_character(screen, maze, start_cell, SYMBOL_MAZE_FIELD_ACCESSIBLE, None);
             delay(GENERATION_DELAY);
             screen.flush().unwrap();
         }
@@ -111,7 +105,7 @@ impl MazeGenerator for Wilson {
                 for pos in path.iter() {
                     maze.data[pos.1][pos.0] = MAZE_VALUE_ACCESSIBLE;
                     if animate {
-                        draw_character(screen, maze, *pos, SYMBOL_MAZE_FIELD_ACCESSIBLE, false);
+                        draw_character(screen, maze, *pos, SYMBOL_MAZE_FIELD_ACCESSIBLE, None);
                         delay(GENERATION_DELAY);
                         screen.flush().unwrap();
                     }
