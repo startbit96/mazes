@@ -1,3 +1,4 @@
+use maze::benchmark::*;
 use maze::generator::{Kruskal, MazeGenerationAlgorithms, RecursiveBacktracking, Wilson};
 use maze::maze::Maze;
 use maze::maze_collection::MazeCollection;
@@ -507,6 +508,35 @@ fn main() {
                 // Reorder the mazes in the maze collection (to show that the order
                 // of the mazes has an effect on the length of the solving sequence).
                 maze_container.reorder();
+                maze_container.draw(
+                    &mut screen,
+                    show_graph,
+                    show_background_graph,
+                    show_binary_representation,
+                    show_background_binary_representation,
+                );
+            }
+            Key::Char('t') => {
+                // Benchmark.
+                terminal_ui::print_solving_sequence(
+                    &mut screen,
+                    String::from("Executing benchmark ..."),
+                );
+                let benchmark_results = BenchmarkResultCollection::benchmark(&mut screen, 31, 31);
+                let csv_filename = benchmark_results.to_csv();
+                terminal_ui::print_solving_sequence(
+                    &mut screen,
+                    format!("Benchmark results written to '{}'.", csv_filename),
+                );
+                // Reset to the previous setting.
+                terminal_ui::erase_draw_area(&mut screen);
+                terminal_ui::print_informations(
+                    &mut screen,
+                    generation_algorithm.to_string(),
+                    solving_algorithm.to_string(),
+                    0,
+                    animate,
+                );
                 maze_container.draw(
                     &mut screen,
                     show_graph,

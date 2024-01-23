@@ -47,7 +47,6 @@ impl MazeGenerator for RecursiveBacktracking {
                 None,
             );
             delay(GENERATION_DELAY);
-            screen.flush().unwrap();
         }
 
         // Remove the starting cell from the unvisited cells.
@@ -101,10 +100,13 @@ impl MazeGenerator for RecursiveBacktracking {
                         None,
                     );
                     delay(GENERATION_DELAY);
-                    screen.flush().unwrap();
                 }
             }
             unvisited_cells.remove(&current_cell);
         }
+    }
+
+    fn to_string(&self) -> String {
+        String::from("recursive backtracking")
     }
 }

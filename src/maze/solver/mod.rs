@@ -21,6 +21,8 @@ pub trait MazeSolver {
         screen: &mut dyn Write,
         animate: bool,
     ) -> (Vec<(usize, usize)>, usize);
+
+    fn to_string(&self) -> String;
 }
 
 #[derive(Debug, PartialEq, Eq)]

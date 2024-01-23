@@ -39,7 +39,6 @@ impl MazeGenerator for Kruskal {
                 if animate {
                     draw_character(screen, maze, (col, row), SYMBOL_MAZE_FIELD_ACCESSIBLE, None);
                     delay(GENERATION_DELAY);
-                    screen.flush().unwrap();
                 }
             }
         }
@@ -54,7 +53,6 @@ impl MazeGenerator for Kruskal {
             for (idx, tree) in forest.iter().enumerate() {
                 highlight_cells_by_rgb_color(screen, maze, tree.clone(), colors[idx]);
             }
-            screen.flush().unwrap();
             delay(GENERATION_DELAY);
         }
 
@@ -147,12 +145,15 @@ impl MazeGenerator for Kruskal {
                     colors.remove(tree1);
                     highlight_cells_by_rgb_color(screen, maze, new_tree, colors[colors.len() - 1]);
                     delay(GENERATION_DELAY);
-                    screen.flush().unwrap();
                 }
             }
         }
         if animate {
             delay(GENERATION_DELAY);
         }
+    }
+
+    fn to_string(&self) -> String {
+        String::from("Kruskal")
     }
 }

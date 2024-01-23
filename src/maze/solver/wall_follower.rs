@@ -63,4 +63,8 @@ impl MazeSolver for WallFollower {
 
         (Vec::new(), inspected_cells.len())
     }
+
+    fn to_string(&self) -> String {
+        String::from("wall follower")
+    }
 }

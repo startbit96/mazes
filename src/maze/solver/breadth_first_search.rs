@@ -64,4 +64,8 @@ impl MazeSolver for BreadthFirstSearch {
         }
         panic!()
     }
+
+    fn to_string(&self) -> String {
+        String::from("BFS")
+    }
 }

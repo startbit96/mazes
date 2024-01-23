@@ -78,4 +78,8 @@ impl MazeSolver for AStar {
         }
         panic!()
     }
+
+    fn to_string(&self) -> String {
+        String::from("A*")
+    }
 }

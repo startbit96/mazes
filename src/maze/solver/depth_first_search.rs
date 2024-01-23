@@ -67,4 +67,8 @@ impl MazeSolver for DepthFirstSearch {
         }
         panic!()
     }
+
+    fn to_string(&self) -> String {
+        String::from("DFS")
+    }
 }

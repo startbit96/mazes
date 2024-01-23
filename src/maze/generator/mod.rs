@@ -14,6 +14,8 @@ pub use wilson::Wilson;
 
 pub trait MazeGenerator {
     fn generate(&self, maze: &mut Maze, screen: &mut dyn Write, animate: bool);
+
+    fn to_string(&self) -> String;
 }
 
 #[derive(Debug)]

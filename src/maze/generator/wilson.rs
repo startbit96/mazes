@@ -41,7 +41,6 @@ impl MazeGenerator for Wilson {
         if animate {
             draw_character(screen, maze, start_cell, SYMBOL_MAZE_FIELD_ACCESSIBLE, None);
             delay(GENERATION_DELAY);
-            screen.flush().unwrap();
         }
 
         // Choose a random cell to start the random walk from.
@@ -107,7 +106,6 @@ impl MazeGenerator for Wilson {
                     if animate {
                         draw_character(screen, maze, *pos, SYMBOL_MAZE_FIELD_ACCESSIBLE, None);
                         delay(GENERATION_DELAY);
-                        screen.flush().unwrap();
                     }
                 }
                 unvisited_cells.retain(|&x| !path.contains(&x));
@@ -125,5 +123,9 @@ impl MazeGenerator for Wilson {
                 path.push(current_cell);
             }
         }
+    }
+
+    fn to_string(&self) -> String {
+        String::from("Wilson")
     }
 }
