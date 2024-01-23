@@ -34,13 +34,14 @@ fn main() {
 
     // To toggle visualization options.
     let mut show_graph: bool = false;
+    let mut show_background_graph: bool = false;
     let mut show_binary_representation: bool = false;
     let mut show_background_binary_representation: bool = false;
     let mut animate: bool = false;
 
     // Selected algorithms.
     let mut generation_algorithm = MazeGenerationAlgorithms::Kruskal;
-    let mut solving_algorithm = MazeSolvingAlgorithms::BreadthFirstSearch;
+    let mut solving_algorithm = MazeSolvingAlgorithms::DepthFirstSearch;
 
     // Draw terminal ui and the maze.
     terminal_ui::intialize_terminal_ui(&mut screen);
@@ -70,6 +71,7 @@ fn main() {
     maze_container.draw(
         &mut screen,
         show_graph,
+        show_background_graph,
         show_binary_representation,
         show_background_binary_representation,
     );
@@ -103,6 +105,7 @@ fn main() {
                 maze_container.draw(
                     &mut screen,
                     show_graph,
+                    show_background_graph,
                     show_binary_representation,
                     show_background_binary_representation,
                 );
@@ -126,6 +129,7 @@ fn main() {
                     maze_container.draw(
                         &mut screen,
                         show_graph,
+                        show_background_graph,
                         show_binary_representation,
                         show_background_binary_representation,
                     );
@@ -159,6 +163,7 @@ fn main() {
                     maze_container.draw(
                         &mut screen,
                         show_graph,
+                        show_background_graph,
                         show_binary_representation,
                         show_background_binary_representation,
                     );
@@ -191,6 +196,7 @@ fn main() {
                     maze.draw(
                         &mut screen,
                         show_graph,
+                        show_background_graph,
                         show_binary_representation,
                         show_background_binary_representation,
                     );
@@ -214,6 +220,7 @@ fn main() {
                     maze.draw(
                         &mut screen,
                         show_graph,
+                        show_background_graph,
                         show_binary_representation,
                         show_background_binary_representation,
                     );
@@ -276,6 +283,7 @@ fn main() {
                 maze_container.draw(
                     &mut screen,
                     show_graph,
+                    show_background_graph,
                     show_binary_representation,
                     show_background_binary_representation,
                 );
@@ -296,13 +304,19 @@ fn main() {
                 maze_container.draw(
                     &mut screen,
                     show_graph,
+                    show_background_graph,
                     show_binary_representation,
                     show_background_binary_representation,
                 );
             }
             Key::Char('g') => {
                 // Show / hide graph nodes.
-                show_graph = !show_graph;
+                (show_graph, show_background_graph) = match (show_graph, show_background_graph) {
+                    (false, false) => (true, true),
+                    (true, true) => (true, false),
+                    (true, false) => (false, false),
+                    _ => unreachable!(),
+                };
                 if show_graph {
                     show_binary_representation = false;
                     show_background_binary_representation = false;
@@ -310,6 +324,7 @@ fn main() {
                 maze_container.draw(
                     &mut screen,
                     show_graph,
+                    show_background_graph,
                     show_binary_representation,
                     show_background_binary_representation,
                 );
@@ -351,10 +366,12 @@ fn main() {
                 };
                 if show_binary_representation {
                     show_graph = false;
+                    show_background_graph = false;
                 }
                 maze_container.draw(
                     &mut screen,
                     show_graph,
+                    show_background_graph,
                     show_binary_representation,
                     show_background_binary_representation,
                 );
@@ -397,6 +414,7 @@ fn main() {
                     maze.draw(
                         &mut screen,
                         show_graph,
+                        show_background_graph,
                         show_binary_representation,
                         show_background_binary_representation,
                     );
@@ -454,6 +472,7 @@ fn main() {
                         maze_collection.draw(
                             &mut screen,
                             show_graph,
+                            show_background_graph,
                             show_binary_representation,
                             show_background_binary_representation,
                         );
@@ -469,6 +488,7 @@ fn main() {
                 maze_container.draw(
                     &mut screen,
                     show_graph,
+                    show_background_graph,
                     show_binary_representation,
                     show_background_binary_representation,
                 );

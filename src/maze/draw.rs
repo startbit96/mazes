@@ -107,7 +107,39 @@ pub fn erase_maze(screen: &mut dyn Write, maze: &Maze) {
     }
 }
 
-pub fn draw_maze(screen: &mut dyn Write, maze: &Maze, show_graph: bool) {
+pub fn draw_maze(screen: &mut dyn Write, maze: &Maze) {
+    erase_maze(screen, maze);
+    let (maze_pos_x, maze_pos_y) = calculate_maze_position(maze);
+    for row in 0..maze.height {
+        write!(
+            screen,
+            "{}{}",
+            termion::cursor::Goto(maze_pos_x, maze_pos_y + row as u16),
+            maze.data[row]
+                .iter()
+                .enumerate()
+                .map(|(col, &is_accessible)| {
+                    match is_accessible {
+                        MAZE_VALUE_BLOCKED => SYMBOL_MAZE_FIELD_BLOCKED,
+                        MAZE_VALUE_ACCESSIBLE => {
+                            if (col, row) == maze.pos_start {
+                                SYMBOL_MAZE_POS_START
+                            } else if (col, row) == maze.pos_end {
+                                SYMBOL_MAZE_POS_END
+                            } else {
+                                SYMBOL_MAZE_FIELD_ACCESSIBLE
+                            }
+                        }
+                    }
+                })
+                .collect::<String>()
+        )
+        .unwrap();
+    }
+    screen.flush().unwrap();
+}
+
+pub fn draw_graph_representation(screen: &mut dyn Write, maze: &Maze, show_background: bool) {
     erase_maze(screen, maze);
     let (maze_pos_x, maze_pos_y) = calculate_maze_position(maze);
     for row in 0..maze.height {
@@ -120,19 +152,16 @@ pub fn draw_maze(screen: &mut dyn Write, maze: &Maze, show_graph: bool) {
                 .zip(maze.is_node[row].iter())
                 .enumerate()
                 .map(|(col, (&is_accessible, &is_node))| {
-                    match (is_accessible, is_node, show_graph) {
-                        (MAZE_VALUE_BLOCKED, _, _) => SYMBOL_MAZE_FIELD_BLOCKED,
-                        (MAZE_VALUE_ACCESSIBLE, _, false) => {
-                            if (col, row) == maze.pos_start {
-                                SYMBOL_MAZE_POS_START
-                            } else if (col, row) == maze.pos_end {
-                                SYMBOL_MAZE_POS_END
+                    match (is_accessible, is_node) {
+                        (MAZE_VALUE_BLOCKED, _) => {
+                            if show_background {
+                                SYMBOL_MAZE_FIELD_BLOCKED
                             } else {
                                 SYMBOL_MAZE_FIELD_ACCESSIBLE
                             }
                         }
-                        (MAZE_VALUE_ACCESSIBLE, true, true) => SYMBOL_MAZE_GRAPH_NODE,
-                        (MAZE_VALUE_ACCESSIBLE, false, true) => match maze.data[row][col - 1] {
+                        (MAZE_VALUE_ACCESSIBLE, true) => SYMBOL_MAZE_GRAPH_NODE,
+                        (MAZE_VALUE_ACCESSIBLE, false) => match maze.data[row][col - 1] {
                             MAZE_VALUE_ACCESSIBLE => SYMBOL_MAZE_GRAPH_CONNECTION_HORIZONTAL,
                             MAZE_VALUE_BLOCKED => SYMBOL_MAZE_GRAPH_CONNECTION_VERTICAL,
                         },
@@ -145,7 +174,7 @@ pub fn draw_maze(screen: &mut dyn Write, maze: &Maze, show_graph: bool) {
     screen.flush().unwrap();
 }
 
-pub fn draw_binary_representation(screen: &mut dyn Write, maze: &Maze, highlight_background: bool) {
+pub fn draw_binary_representation(screen: &mut dyn Write, maze: &Maze, show_background: bool) {
     erase_maze(screen, maze);
     let (maze_pos_x, maze_pos_y) = calculate_maze_position(maze);
     for row in 0..maze.height {
@@ -159,7 +188,7 @@ pub fn draw_binary_representation(screen: &mut dyn Write, maze: &Maze, highlight
                     MAZE_VALUE_ACCESSIBLE => format!(
                         "{}{}{}",
                         termion::color::Fg(termion::color::Black),
-                        match highlight_background {
+                        match show_background {
                             true => format!("{}", termion::color::Bg(termion::color::White)),
                             false => format!("{}", termion::color::Bg(termion::color::Reset)),
                         },
@@ -167,11 +196,11 @@ pub fn draw_binary_representation(screen: &mut dyn Write, maze: &Maze, highlight
                     ),
                     MAZE_VALUE_BLOCKED => format!(
                         "{}{}{}",
-                        match highlight_background {
+                        match show_background {
                             true => format!("{}", termion::color::Fg(termion::color::White)),
                             false => format!("{}", termion::color::Fg(termion::color::Black)),
                         },
-                        match highlight_background {
+                        match show_background {
                             true => format!("{}", termion::color::Bg(termion::color::Black)),
                             false => format!("{}", termion::color::Bg(termion::color::Reset)),
                         },

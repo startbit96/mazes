@@ -54,7 +54,7 @@ impl MazeCollection {
         self.mazes
             .iter_mut()
             .for_each(|maze| maze.reset_start_end_position());
-        self.draw(screen, false, false, false);
+        self.draw(screen, false, false, false, false);
         // Returns the path and the number of inspected cells.
         let mut path: Vec<(usize, usize)> = Vec::new();
         let mut number_of_inspected_cells = 0;
@@ -64,7 +64,7 @@ impl MazeCollection {
         for idx in 0..self.mazes.len() {
             if idx > 0 {
                 // Redraw the last maze.
-                self.mazes[idx - 1].draw(screen, false, false, false);
+                self.mazes[idx - 1].draw(screen, false, false, false, false);
             }
             // Solve the maze.
             let (mut sub_path, sub_inspected_cells) =
@@ -73,7 +73,7 @@ impl MazeCollection {
             if animate {
                 delay(Delay::VeryLong);
             }
-            self.mazes[idx].draw(screen, false, false, false);
+            self.mazes[idx].draw(screen, false, false, false, false);
             // Apply the solving sequence to all previous mazes and update their resulting position.
             // Apply the solving sequence to all upcoming mazes and update their start position.
             let solving_sequence = get_solving_sequence(&sub_path);
@@ -81,24 +81,26 @@ impl MazeCollection {
                 for idx_other in 0..self.mazes.len() {
                     if idx == idx_other {
                         draw_path(screen, &self.mazes[idx], sub_path.clone(), None);
+                    } else {
+                        // Erase the last positions marker and draw the current marker.
+                        draw_character(
+                            screen,
+                            &self.mazes[idx_other],
+                            current_positions[idx_other],
+                            if current_positions[idx_other] == self.mazes[idx_other].pos_start {
+                                SYMBOL_MAZE_POS_START
+                            } else if current_positions[idx_other] == self.mazes[idx_other].pos_end
+                            {
+                                SYMBOL_MAZE_POS_END
+                            } else {
+                                SYMBOL_MAZE_FIELD_ACCESSIBLE
+                            },
+                            None,
+                        );
                     }
                     let direction = AbsoluteDirection::from_char(*c);
                     let pos_next =
                         apply_step(&self.mazes[idx_other], current_positions[idx_other], *c);
-                    // Erase the last positions marker and draw the current marker.
-                    draw_character(
-                        screen,
-                        &self.mazes[idx_other],
-                        current_positions[idx_other],
-                        if current_positions[idx_other] == self.mazes[idx_other].pos_start {
-                            SYMBOL_MAZE_POS_START
-                        } else if current_positions[idx_other] == self.mazes[idx_other].pos_end {
-                            SYMBOL_MAZE_POS_END
-                        } else {
-                            SYMBOL_MAZE_FIELD_ACCESSIBLE
-                        },
-                        None,
-                    );
                     draw_character(
                         screen,
                         &self.mazes[idx_other],
@@ -115,7 +117,7 @@ impl MazeCollection {
             // Update the start position of the upcoming mazes.
             for idx_other in (idx + 1)..self.mazes.len() {
                 self.mazes[idx_other].pos_start = current_positions[idx_other];
-                self.mazes[idx_other].draw(screen, false, false, false);
+                self.mazes[idx_other].draw(screen, false, false, false, false);
             }
             // In order to later create the solving sequence, the consecutive positions
             // are only allowed to be one step away from eachother. So we need to move
@@ -135,7 +137,7 @@ impl MazeCollection {
             number_of_inspected_cells += sub_inspected_cells;
         }
         // At the end, redraw all mazes and mark the final position.
-        self.draw(screen, false, false, false);
+        self.draw(screen, false, false, false, false);
         for idx in 0..self.mazes.len() {
             draw_character(
                 screen,
@@ -152,15 +154,17 @@ impl MazeCollection {
         &self,
         screen: &mut dyn Write,
         show_graph: bool,
+        show_background_graph: bool,
         show_binary_presentation: bool,
-        highlight_binary_presentation: bool,
+        show_background_binary_presentation: bool,
     ) {
         self.mazes.iter().for_each(|maze| {
             maze.draw(
                 screen,
                 show_graph,
+                show_background_graph,
                 show_binary_presentation,
-                highlight_binary_presentation,
+                show_background_binary_presentation,
             )
         });
     }

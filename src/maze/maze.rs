@@ -172,7 +172,7 @@ impl Maze {
     ) {
         // Draw the maze as empty as it is and draw it empty.
         self.reset();
-        self.draw(screen, false, false, false);
+        self.draw(screen, false, false, false, false);
         // Generate the maze.
         generator.generate(self, screen, animate);
         // Generate the graph once.
@@ -186,7 +186,7 @@ impl Maze {
         animate: bool,
     ) -> (Vec<(usize, usize)>, usize) {
         // Draw the maze again (this may delete the path from the previous solving).
-        self.draw(screen, false, false, false);
+        self.draw(screen, false, false, false, false);
         solver.solve(self, screen, animate)
     }
 
@@ -194,16 +194,21 @@ impl Maze {
         &self,
         screen: &mut dyn Write,
         show_graph: bool,
+        show_background_graph: bool,
         show_binary_representation: bool,
-        highlight_binary_representation: bool,
+        show_background_binary_representation: bool,
     ) {
-        if show_graph && (show_binary_representation || highlight_binary_representation) {
+        if (show_graph || show_background_graph)
+            && (show_binary_representation || show_background_binary_representation)
+        {
             panic!();
         }
-        if show_binary_representation {
-            draw_binary_representation(screen, self, highlight_binary_representation);
+        if show_graph {
+            draw_graph_representation(screen, self, show_background_graph);
+        } else if show_binary_representation {
+            draw_binary_representation(screen, self, show_background_binary_representation);
         } else {
-            draw_maze(screen, self, show_graph);
+            draw_maze(screen, self);
         }
     }
 
