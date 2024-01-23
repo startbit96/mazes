@@ -84,6 +84,25 @@ fn main() {
         let key = c.unwrap();
         match key {
             Key::Char('q') => break,
+            Key::Ctrl('l') => {
+                // Redraw everything.
+                terminal_ui::intialize_terminal_ui(&mut screen);
+                terminal_ui::print_informations(
+                    &mut screen,
+                    generation_algorithm.to_string(),
+                    solving_algorithm.to_string(),
+                    0,
+                    animate,
+                );
+                terminal_ui::print_solving_sequence(&mut screen, String::new());
+                maze_container.draw(
+                    &mut screen,
+                    show_graph,
+                    show_background_graph,
+                    show_binary_representation,
+                    show_background_binary_representation,
+                );
+            }
             Key::Char('r') => {
                 // Reset the informations in the UI.
                 terminal_ui::print_informations(
