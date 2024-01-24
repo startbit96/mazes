@@ -66,6 +66,6 @@ impl MazeSolver for BreadthFirstSearch {
     }
 
     fn to_string(&self) -> String {
-        String::from("BFS")
+        String::from("breadth-first search")
     }
 }

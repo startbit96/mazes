@@ -6,18 +6,15 @@ use crate::maze::path::calculate_manhattan_distance;
 use crate::maze::solver::{MazeSolver, SOLVING_DELAY};
 use std::collections::{BTreeSet, HashSet};
 
-pub struct AStarWeighted;
+pub struct GreedyBestFirstSearch;
 
-impl MazeSolver for AStarWeighted {
+impl MazeSolver for GreedyBestFirstSearch {
     fn solve(
         &self,
         maze: &mut Maze,
         screen: &mut dyn std::io::Write,
         animate: bool,
     ) -> (Vec<(usize, usize)>, usize) {
-        // Weighted A*.
-        let distance_weight: f64 = 2.0;
-
         let mut queue: BTreeSet<(
             usize,
             (usize, usize),
@@ -26,8 +23,7 @@ impl MazeSolver for AStarWeighted {
         )> = BTreeSet::new();
         // Add the start position.
         queue.insert((
-            (distance_weight * calculate_manhattan_distance(maze.pos_start, maze.pos_end) as f64)
-                as usize,
+            calculate_manhattan_distance(maze.pos_start, maze.pos_end),
             maze.pos_start,
             None,
             vec![maze.pos_start],
@@ -71,10 +67,7 @@ impl MazeSolver for AStarWeighted {
                     let mut path_next = path.clone();
                     path_next.push(pos_next.clone());
                     queue.insert((
-                        (path_next.len() - 1)
-                            + (distance_weight
-                                * calculate_manhattan_distance(pos_next, maze.pos_end) as f64)
-                                as usize,
+                        calculate_manhattan_distance(pos_next, maze.pos_end),
                         pos_next,
                         Some(*next_direction),
                         path_next,
@@ -86,6 +79,6 @@ impl MazeSolver for AStarWeighted {
     }
 
     fn to_string(&self) -> String {
-        String::from("A* weighted")
+        String::from("greedy best-first search")
     }
 }

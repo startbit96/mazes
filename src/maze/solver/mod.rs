@@ -8,12 +8,14 @@ pub mod a_star;
 pub mod a_star_weighted;
 pub mod breadth_first_search;
 pub mod depth_first_search;
+pub mod greedy_best_first_search;
 pub mod wall_follower;
 
 pub use a_star::AStar;
 pub use a_star_weighted::AStarWeighted;
 pub use breadth_first_search::BreadthFirstSearch;
 pub use depth_first_search::DepthFirstSearch;
+pub use greedy_best_first_search::GreedyBestFirstSearch;
 pub use wall_follower::WallFollower;
 
 pub trait MazeSolver {
@@ -33,6 +35,7 @@ pub enum MazeSolvingAlgorithms {
     AStarWeighted,
     BreadthFirstSearch,
     DepthFirstSearch,
+    GreedyBestFirstSearch,
     WallFollower,
 }
 
@@ -42,7 +45,8 @@ impl MazeSolvingAlgorithms {
             Self::AStar => Self::AStarWeighted,
             Self::AStarWeighted => Self::BreadthFirstSearch,
             Self::BreadthFirstSearch => Self::DepthFirstSearch,
-            Self::DepthFirstSearch => Self::WallFollower,
+            Self::DepthFirstSearch => Self::GreedyBestFirstSearch,
+            Self::GreedyBestFirstSearch => Self::WallFollower,
             Self::WallFollower => Self::AStar,
         }
     }
@@ -53,6 +57,7 @@ impl MazeSolvingAlgorithms {
             Self::AStarWeighted => "A* weighted",
             Self::BreadthFirstSearch => "BFS",
             Self::DepthFirstSearch => "DFS",
+            Self::GreedyBestFirstSearch => "greedy best-first search",
             Self::WallFollower => "wall follower",
         }
     }

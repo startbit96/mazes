@@ -268,6 +268,7 @@ fn main() {
                         MazeSolvingAlgorithms::BreadthFirstSearch => &BreadthFirstSearch,
 
                         MazeSolvingAlgorithms::DepthFirstSearch => &DepthFirstSearch,
+                        MazeSolvingAlgorithms::GreedyBestFirstSearch => &GreedyBestFirstSearch,
                         MazeSolvingAlgorithms::WallFollower => &WallFollower,
                     },
                     &mut screen,

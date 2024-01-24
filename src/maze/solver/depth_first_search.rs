@@ -69,6 +69,6 @@ impl MazeSolver for DepthFirstSearch {
     }
 
     fn to_string(&self) -> String {
-        String::from("DFS")
+        String::from("depth-first search")
     }
 }

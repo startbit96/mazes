@@ -8,9 +8,9 @@ use std::io::{Result, Write};
 
 const BENCHMARK_MAZE_WIDTH: usize = 45;
 const BENCHMARK_MAZE_HEIGHT: usize = 45;
-const BENCHMARK_NUMBER_OF_MAZES_PER_GENERATION_ALGORITHM: usize = 1000;
+const BENCHMARK_NUMBER_OF_MAZES_PER_GENERATION_ALGORITHM: usize = 25000;
 const BENCHMARK_CHUNK_SIZE: usize = 2;
-const BENCHMARK_NUMBER_OF_RANDOM_POSITIONS_PER_MAZE: usize = 10;
+const BENCHMARK_NUMBER_OF_RANDOM_POSITIONS_PER_MAZE: usize = 25;
 
 pub struct NullWriter;
 
@@ -69,6 +69,7 @@ impl BenchmarkResultCollection {
             &DepthFirstSearch,
             &AStar,
             &AStarWeighted,
+            &GreedyBestFirstSearch,
         ];
 
         // Are we done?
