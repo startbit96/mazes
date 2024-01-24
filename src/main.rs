@@ -1,13 +1,12 @@
 use maze::benchmark::*;
-use maze::generator::{Kruskal, MazeGenerationAlgorithms, RecursiveBacktracking, Wilson};
+use maze::generator::*;
 use maze::maze::Maze;
 use maze::maze_collection::MazeCollection;
 use maze::maze_container::MazeContainer;
 use maze::path::get_solving_sequence;
-use maze::solver::{
-    AStar, BreadthFirstSearch, DepthFirstSearch, MazeSolvingAlgorithms, WallFollower,
-};
+use maze::solver::*;
 use std::io::{stdin, stdout, Write};
+use std::time::Instant;
 use terminal_ui::{TERMINAL_HEIGHT_MIN, TERMINAL_WIDTH_MIN};
 use termion::event::Key;
 use termion::input::TermRead;
@@ -46,20 +45,21 @@ fn main() {
     let mut generation_algorithm = MazeGenerationAlgorithms::Kruskal;
     let mut solving_algorithm = MazeSolvingAlgorithms::DepthFirstSearch;
 
+    // Initialize the maze with the information about its max size.
+    let (max_maze_width, max_maze_height) = terminal_ui::get_max_draw_size();
+    let mut maze_container =
+        MazeContainer::SingleMaze(Maze::new(max_maze_width, max_maze_height, (1, 1)));
+
     // Draw terminal ui and the maze.
     terminal_ui::intialize_terminal_ui(&mut screen);
     terminal_ui::print_informations(
         &mut screen,
+        maze_container.get_size(),
         generation_algorithm.to_string(),
         solving_algorithm.to_string(),
         0,
         animate,
     );
-
-    // Initialize the maze with the information about its max size.
-    let (max_maze_width, max_maze_height) = terminal_ui::get_max_draw_size();
-    let mut maze_container =
-        MazeContainer::SingleMaze(Maze::new(max_maze_width, max_maze_height, (1, 1)));
 
     // Generate the first maze.
     maze_container.generate(
@@ -90,6 +90,7 @@ fn main() {
                 terminal_ui::intialize_terminal_ui(&mut screen);
                 terminal_ui::print_informations(
                     &mut screen,
+                    maze_container.get_size(),
                     generation_algorithm.to_string(),
                     solving_algorithm.to_string(),
                     0,
@@ -108,6 +109,7 @@ fn main() {
                 // Reset the informations in the UI.
                 terminal_ui::print_informations(
                     &mut screen,
+                    maze_container.get_size(),
                     generation_algorithm.to_string(),
                     solving_algorithm.to_string(),
                     0,
@@ -158,6 +160,7 @@ fn main() {
                     // Reset the informations in the UI.
                     terminal_ui::print_informations(
                         &mut screen,
+                        maze_container.get_size(),
                         generation_algorithm.to_string(),
                         solving_algorithm.to_string(),
                         0,
@@ -192,6 +195,7 @@ fn main() {
                     // Reset the informations in the UI.
                     terminal_ui::print_informations(
                         &mut screen,
+                        maze_container.get_size(),
                         generation_algorithm.to_string(),
                         solving_algorithm.to_string(),
                         0,
@@ -206,6 +210,7 @@ fn main() {
                     // Reset the informations in the UI.
                     terminal_ui::print_informations(
                         &mut screen,
+                        (maze.width, maze.height),
                         generation_algorithm.to_string(),
                         solving_algorithm.to_string(),
                         0,
@@ -230,6 +235,7 @@ fn main() {
                     // Reset the informations in the UI.
                     terminal_ui::print_informations(
                         &mut screen,
+                        (maze.width, maze.height),
                         generation_algorithm.to_string(),
                         solving_algorithm.to_string(),
                         0,
@@ -258,6 +264,7 @@ fn main() {
                 let (path, number_of_inspected_cells) = maze_container.solve(
                     match solving_algorithm {
                         MazeSolvingAlgorithms::AStar => &AStar,
+                        MazeSolvingAlgorithms::AStarWeighted => &AStarWeighted,
                         MazeSolvingAlgorithms::BreadthFirstSearch => &BreadthFirstSearch,
 
                         MazeSolvingAlgorithms::DepthFirstSearch => &DepthFirstSearch,
@@ -274,6 +281,7 @@ fn main() {
                 // Print the informations in the UI.
                 terminal_ui::print_informations(
                     &mut screen,
+                    maze_container.get_size(),
                     generation_algorithm.to_string(),
                     solving_algorithm.to_string(),
                     number_of_inspected_cells,
@@ -287,6 +295,7 @@ fn main() {
                 // Print / reset the informations in the UI.
                 terminal_ui::print_informations(
                     &mut screen,
+                    maze_container.get_size(),
                     generation_algorithm.to_string(),
                     solving_algorithm.to_string(),
                     0,
@@ -317,6 +326,7 @@ fn main() {
                 // Print / reset the informations in the UI.
                 terminal_ui::print_informations(
                     &mut screen,
+                    maze_container.get_size(),
                     generation_algorithm.to_string(),
                     solving_algorithm.to_string(),
                     0,
@@ -354,6 +364,7 @@ fn main() {
                 // Reset the informations in the UI.
                 terminal_ui::print_informations(
                     &mut screen,
+                    maze_container.get_size(),
                     generation_algorithm.to_string(),
                     solving_algorithm.to_string(),
                     0,
@@ -367,6 +378,7 @@ fn main() {
                 // Print the informations in the UI.
                 terminal_ui::print_informations(
                     &mut screen,
+                    maze_container.get_size(),
                     generation_algorithm.to_string(),
                     solving_algorithm.to_string(),
                     0,
@@ -401,6 +413,7 @@ fn main() {
                 // Reset the informations in the UI.
                 terminal_ui::print_informations(
                     &mut screen,
+                    maze_container.get_size(),
                     generation_algorithm.to_string(),
                     solving_algorithm.to_string(),
                     0,
@@ -415,6 +428,7 @@ fn main() {
                     terminal_ui::erase_draw_area(&mut screen);
                     terminal_ui::print_informations(
                         &mut screen,
+                        maze_container.get_size(),
                         generation_algorithm.to_string(),
                         solving_algorithm.to_string(),
                         0,
@@ -474,6 +488,7 @@ fn main() {
                         terminal_ui::erase_draw_area(&mut screen);
                         terminal_ui::print_informations(
                             &mut screen,
+                            maze_container.get_size(),
                             generation_algorithm.to_string(),
                             solving_algorithm.to_string(),
                             0,
@@ -518,20 +533,39 @@ fn main() {
             }
             Key::Char('t') => {
                 // Benchmark.
+                terminal_ui::erase_draw_area(&mut screen);
                 terminal_ui::print_solving_sequence(
                     &mut screen,
                     String::from("Executing benchmark ..."),
                 );
-                let benchmark_results = BenchmarkResultCollection::benchmark(&mut screen, 31, 31);
+                let start_time = Instant::now();
+                let mut benchmark_results = BenchmarkResultCollection::new();
+                loop {
+                    let (is_running, progress) = benchmark_results.benchmark_next_chunk();
+                    terminal_ui::print_solving_sequence(
+                        &mut screen,
+                        format!("Executing benchmark ... ({}%)", progress),
+                    );
+                    if is_running == false {
+                        break;
+                    }
+                }
                 let csv_filename = benchmark_results.to_csv();
+                let end_time = Instant::now();
+                let elapsed_time = end_time - start_time;
                 terminal_ui::print_solving_sequence(
                     &mut screen,
-                    format!("Benchmark results written to '{}'.", csv_filename),
+                    format!(
+                        "Benchmark results written to '{}'. Benchmark took {} minutes and {} seconds.",
+                        csv_filename,
+                        elapsed_time.as_secs() / 60,
+                        elapsed_time.as_secs() - (elapsed_time.as_secs() / 60) * 60
+                    ),
                 );
                 // Reset to the previous setting.
-                terminal_ui::erase_draw_area(&mut screen);
                 terminal_ui::print_informations(
                     &mut screen,
+                    maze_container.get_size(),
                     generation_algorithm.to_string(),
                     solving_algorithm.to_string(),
                     0,

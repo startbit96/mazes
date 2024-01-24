@@ -81,6 +81,19 @@ impl MazeContainer {
         }
     }
 
+    pub fn get_size(&self) -> (usize, usize) {
+        if let MazeContainer::SingleMaze(ref maze) = self {
+            (maze.width, maze.height)
+        } else if let MazeContainer::MultipleMazes(ref maze_collection) = self {
+            (
+                maze_collection.mazes[0].width,
+                maze_collection.mazes[0].height,
+            )
+        } else {
+            panic!()
+        }
+    }
+
     pub fn reorder(&mut self) {
         if let MazeContainer::MultipleMazes(ref mut maze_collection) = self {
             maze_collection.reorder();

@@ -135,6 +135,7 @@ fn draw_border(screen: &mut dyn Write) {
 
 pub fn print_informations(
     screen: &mut dyn Write,
+    maze_dimension: (usize, usize),
     generation_algorithm: &str,
     solving_algorithm: &str,
     number_of_inspected_cells: usize,
@@ -143,10 +144,12 @@ pub fn print_informations(
     let (width, _) = termion::terminal_size().unwrap();
     write!(
         screen,
-        "{}{}{}generator: {}, solver: {}, insp. cells: {}, animate: {}",
+        "{}{}{}{}x{}, generator: {}, solver: {}, insp. cells: {}, animate: {}",
         termion::cursor::Goto(1, 1),
         " ".repeat(width as usize),
         termion::cursor::Goto(1, 1),
+        maze_dimension.0,
+        maze_dimension.1,
         generation_algorithm,
         solving_algorithm,
         number_of_inspected_cells,
