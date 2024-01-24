@@ -11,6 +11,9 @@ Maze-generation and maze-solving written in Rust and visualized in the terminal.
 ### Implemented maze-solving algorithms.
 * Breadth-first search (BFS)
 * Depth-first search (DFS)
+* Best-first search (greedy)
+* A*
+* A* (weighted)
 * Wall-follower
 
 ## Key bindings.
