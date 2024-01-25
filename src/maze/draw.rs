@@ -221,6 +221,61 @@ pub fn draw_binary_representation(screen: &mut dyn Write, maze: &Maze, show_back
     screen.flush().unwrap();
 }
 
+pub fn draw_grid_representation(screen: &mut dyn Write, maze: &Maze) {
+    // We only need the maze to calculate the position to draw to and to get the size.
+    erase_maze(screen, maze);
+    let (maze_pos_x, maze_pos_y) = calculate_maze_position(maze);
+    let symbol_accessible = format!("{} ", termion::color::Bg(termion::color::Reset));
+    let symbol_not_accessible = format!("{} ", termion::color::Bg(termion::color::LightBlack));
+    let symbol_passage_horizontal = format!(
+        "{}{}{}",
+        termion::color::Bg(termion::color::Black),
+        termion::color::Fg(termion::color::White),
+        SYMBOL_MAZE_GRAPH_CONNECTION_HORIZONTAL
+    );
+    let symbol_passage_vertical = format!(
+        "{}{}{}",
+        termion::color::Bg(termion::color::Black),
+        termion::color::Fg(termion::color::White),
+        SYMBOL_MAZE_GRAPH_CONNECTION_VERTICAL
+    );
+    for row in 0..maze.height {
+        write!(
+            screen,
+            "{}{}",
+            termion::cursor::Goto(maze_pos_x, maze_pos_y + row as u16),
+            if row == 0 || row == maze.height - 1 {
+                symbol_not_accessible.repeat(maze.width)
+            } else if row % 2 == 1 {
+                format!(
+                    "{}{}{}{}",
+                    symbol_not_accessible,
+                    symbol_accessible,
+                    format!("{}{}", symbol_passage_horizontal, symbol_accessible)
+                        .repeat((maze.width - 3) / 2),
+                    symbol_not_accessible
+                )
+            } else {
+                format!(
+                    "{}{}",
+                    symbol_not_accessible,
+                    format!("{}{}", symbol_passage_vertical, symbol_not_accessible)
+                        .repeat((maze.width - 1) / 2)
+                )
+            }
+        )
+        .unwrap();
+    }
+    write!(
+        screen,
+        "{}{}",
+        termion::color::Fg(termion::color::Reset),
+        termion::color::Bg(termion::color::Reset)
+    )
+    .unwrap();
+    screen.flush().unwrap();
+}
+
 pub fn highlight_cell(
     screen: &mut dyn Write,
     maze: &Maze,

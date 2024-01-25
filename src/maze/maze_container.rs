@@ -45,6 +45,7 @@ impl MazeContainer {
         show_background_graph: bool,
         show_binary_representation: bool,
         show_background_binary_representation: bool,
+        show_grid_representation: bool,
     ) {
         if let MazeContainer::SingleMaze(ref mut maze) = self {
             maze.draw(
@@ -53,6 +54,7 @@ impl MazeContainer {
                 show_background_graph,
                 show_binary_representation,
                 show_background_binary_representation,
+                show_grid_representation,
             );
         } else if let MazeContainer::MultipleMazes(ref mut maze_collection) = self {
             maze_collection.draw(
@@ -61,6 +63,7 @@ impl MazeContainer {
                 show_background_graph,
                 show_binary_representation,
                 show_background_binary_representation,
+                show_grid_representation,
             );
         }
     }

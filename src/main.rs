@@ -39,6 +39,7 @@ fn main() {
     let mut show_background_graph: bool = false;
     let mut show_binary_representation: bool = false;
     let mut show_background_binary_representation: bool = false;
+    let mut show_grid_representation: bool = false;
     let mut animate: bool = false;
 
     // Selected algorithms.
@@ -77,6 +78,7 @@ fn main() {
         show_background_graph,
         show_binary_representation,
         show_background_binary_representation,
+        show_grid_representation,
     );
 
     // The main loop that keeps the program alive. q breaks it.
@@ -103,6 +105,7 @@ fn main() {
                     show_background_graph,
                     show_binary_representation,
                     show_background_binary_representation,
+                    show_grid_representation,
                 );
             }
             Key::Char('r') => {
@@ -132,6 +135,7 @@ fn main() {
                     show_background_graph,
                     show_binary_representation,
                     show_background_binary_representation,
+                    show_grid_representation,
                 );
             }
             Key::Up | Key::Char('k') => {
@@ -156,6 +160,7 @@ fn main() {
                         show_background_graph,
                         show_binary_representation,
                         show_background_binary_representation,
+                        show_grid_representation,
                     );
                     // Reset the informations in the UI.
                     terminal_ui::print_informations(
@@ -191,6 +196,7 @@ fn main() {
                         show_background_graph,
                         show_binary_representation,
                         show_background_binary_representation,
+                        show_grid_representation,
                     );
                     // Reset the informations in the UI.
                     terminal_ui::print_informations(
@@ -226,6 +232,7 @@ fn main() {
                         show_background_graph,
                         show_binary_representation,
                         show_background_binary_representation,
+                        show_grid_representation,
                     );
                 }
             }
@@ -251,6 +258,7 @@ fn main() {
                         show_background_graph,
                         show_binary_representation,
                         show_background_binary_representation,
+                        show_grid_representation,
                     );
                 }
             }
@@ -261,6 +269,13 @@ fn main() {
                         continue;
                     }
                 }
+                (
+                    show_graph,
+                    show_background_graph,
+                    show_binary_representation,
+                    show_background_binary_representation,
+                    show_grid_representation,
+                ) = (false, false, false, false, false);
                 let (path, number_of_inspected_cells) = maze_container.solve(
                     match solving_algorithm {
                         MazeSolvingAlgorithms::AStar => &AStar,
@@ -319,6 +334,7 @@ fn main() {
                     show_background_graph,
                     show_binary_representation,
                     show_background_binary_representation,
+                    show_grid_representation,
                 );
             }
             Key::Char('l') => {
@@ -341,37 +357,8 @@ fn main() {
                     show_background_graph,
                     show_binary_representation,
                     show_background_binary_representation,
+                    show_grid_representation,
                 );
-            }
-            Key::Char('g') => {
-                // Show / hide graph nodes.
-                (show_graph, show_background_graph) = match (show_graph, show_background_graph) {
-                    (false, false) => (true, true),
-                    (true, true) => (true, false),
-                    (true, false) => (false, false),
-                    _ => unreachable!(),
-                };
-                if show_graph {
-                    show_binary_representation = false;
-                    show_background_binary_representation = false;
-                }
-                maze_container.draw(
-                    &mut screen,
-                    show_graph,
-                    show_background_graph,
-                    show_binary_representation,
-                    show_background_binary_representation,
-                );
-                // Reset the informations in the UI.
-                terminal_ui::print_informations(
-                    &mut screen,
-                    maze_container.get_size(),
-                    generation_algorithm.to_string(),
-                    solving_algorithm.to_string(),
-                    0,
-                    animate,
-                );
-                terminal_ui::print_solving_sequence(&mut screen, String::new());
             }
             Key::Char('a') => {
                 // Toggle animation on / off.
@@ -385,6 +372,38 @@ fn main() {
                     0,
                     animate,
                 );
+            }
+            Key::Char('g') => {
+                // Show / hide graph nodes.
+                (show_graph, show_background_graph) = match (show_graph, show_background_graph) {
+                    (false, false) => (true, true),
+                    (true, true) => (true, false),
+                    (true, false) => (false, false),
+                    _ => unreachable!(),
+                };
+                if show_graph {
+                    show_binary_representation = false;
+                    show_background_binary_representation = false;
+                    show_grid_representation = false;
+                }
+                maze_container.draw(
+                    &mut screen,
+                    show_graph,
+                    show_background_graph,
+                    show_binary_representation,
+                    show_background_binary_representation,
+                    show_grid_representation,
+                );
+                // Reset the informations in the UI.
+                terminal_ui::print_informations(
+                    &mut screen,
+                    maze_container.get_size(),
+                    generation_algorithm.to_string(),
+                    solving_algorithm.to_string(),
+                    0,
+                    animate,
+                );
+                terminal_ui::print_solving_sequence(&mut screen, String::new());
             }
             Key::Char('b') => {
                 // Show the binary representation.
@@ -403,6 +422,7 @@ fn main() {
                 if show_binary_representation {
                     show_graph = false;
                     show_background_graph = false;
+                    show_grid_representation = false;
                 }
                 maze_container.draw(
                     &mut screen,
@@ -410,6 +430,7 @@ fn main() {
                     show_background_graph,
                     show_binary_representation,
                     show_background_binary_representation,
+                    show_grid_representation,
                 );
                 // Reset the informations in the UI.
                 terminal_ui::print_informations(
@@ -422,6 +443,35 @@ fn main() {
                 );
                 terminal_ui::print_solving_sequence(&mut screen, String::new());
             }
+            Key::Char('p') => {
+                // Show the grid representation.
+                show_grid_representation = !show_grid_representation;
+                if show_grid_representation {
+                    show_graph = false;
+                    show_background_graph = false;
+                    show_binary_representation = false;
+                    show_background_binary_representation = false;
+                }
+                maze_container.draw(
+                    &mut screen,
+                    show_graph,
+                    show_background_graph,
+                    show_binary_representation,
+                    show_background_binary_representation,
+                    show_grid_representation,
+                );
+                // Reset the informations in the UI.
+                terminal_ui::print_informations(
+                    &mut screen,
+                    maze_container.get_size(),
+                    generation_algorithm.to_string(),
+                    solving_algorithm.to_string(),
+                    0,
+                    animate,
+                );
+                terminal_ui::print_solving_sequence(&mut screen, String::new());
+            }
+
             Key::Char('1') => {
                 // Switch to a single maze.
                 if let MazeContainer::MultipleMazes(_) = maze_container {
@@ -455,6 +505,7 @@ fn main() {
                         show_background_graph,
                         show_binary_representation,
                         show_background_binary_representation,
+                        show_grid_representation,
                     );
                     maze_container = MazeContainer::SingleMaze(maze);
                 }
@@ -514,6 +565,7 @@ fn main() {
                             show_background_graph,
                             show_binary_representation,
                             show_background_binary_representation,
+                            show_grid_representation,
                         );
 
                         maze_container = MazeContainer::MultipleMazes(maze_collection);
@@ -530,6 +582,7 @@ fn main() {
                     show_background_graph,
                     show_binary_representation,
                     show_background_binary_representation,
+                    show_grid_representation,
                 );
             }
             Key::Char('t') => {
@@ -578,6 +631,7 @@ fn main() {
                     show_background_graph,
                     show_binary_representation,
                     show_background_binary_representation,
+                    show_grid_representation,
                 );
             }
             _ => {}

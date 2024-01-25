@@ -29,9 +29,10 @@ Maze-generation and maze-solving written in Rust and visualized in the terminal.
 | `m` | reset the start and end position to the top left and bottom right corner |  
 | `s` | solve the maze |  
 | `h` | switch to the next generation algorithm |  
-| `l` | switch to the next solving algorithm |  
-| `g` | toggle graph visualization on / off |  
+| `l` | switch to the next solving algorithm |  i
 | `a` | toggle animation on / off |  
+| `g` | toggle graph visualization on / off |  
+| `p` | toggle grid visualization on / off |  
 | `b` | toggle binary representation on (with / without background) / off |  
 | `t` | start benchmarking |  
 | `CTRL + l` | redraw the whole application |  
