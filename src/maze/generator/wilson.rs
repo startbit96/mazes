@@ -3,6 +3,7 @@ use crate::maze::direction::AbsoluteDirection;
 use crate::maze::draw::{draw_character, SYMBOL_MAZE_FIELD_ACCESSIBLE};
 use crate::maze::generator::{MazeGenerator, GENERATION_DELAY};
 use crate::maze::maze::*;
+use crate::maze::path::complete_path;
 use rand::seq::SliceRandom;
 use std::collections::HashSet;
 use std::io::Write;
@@ -59,23 +60,19 @@ impl MazeGenerator for Wilson {
             // Determine the possible directions you can choose from.
             let mut possible_directions: Vec<AbsoluteDirection> = Vec::new();
             // Look to the left.
-            if current_cell.0 > 1 && !path.contains(&(current_cell.0 - 2, current_cell.1)) {
+            if current_cell.0 > 1 {
                 possible_directions.push(AbsoluteDirection::Left);
             }
             // Look to the right.
-            if current_cell.0 < maze.width - 2
-                && !path.contains(&(current_cell.0 + 2, current_cell.1))
-            {
+            if current_cell.0 < maze.width - 2 {
                 possible_directions.push(AbsoluteDirection::Right);
             }
             // Look to the top.
-            if current_cell.1 > 1 && !path.contains(&(current_cell.0, current_cell.1 - 2)) {
+            if current_cell.1 > 1 {
                 possible_directions.push(AbsoluteDirection::Up);
             }
             // Look to the bottom.
-            if current_cell.1 < maze.height - 2
-                && !path.contains(&(current_cell.0, current_cell.1 + 2))
-            {
+            if current_cell.1 < maze.height - 2 {
                 possible_directions.push(AbsoluteDirection::Down);
             }
             // There should always be a direction to choose from. But if we end up
@@ -97,10 +94,17 @@ impl MazeGenerator for Wilson {
             // Go to the next cell. Therefore we need to take two steps.
             for _ in 0..2 {
                 current_cell = direction.apply(current_cell);
-                path.push(current_cell);
             }
+            // Check if we encountered a loop in our current path.
+            if let Some(index) = path.iter().position(|&entry| entry == current_cell) {
+                // Remove all elements from the found index onward
+                path.drain((index + 1)..);
+                continue;
+            }
+            path.push(current_cell);
             // If this is part of the UST, get a new random cell to start a random walk from.
             if !unvisited_cells.contains(&current_cell) {
+                path = complete_path(path);
                 for pos in path.iter() {
                     maze.data[pos.1][pos.0] = MAZE_VALUE_ACCESSIBLE;
                     if animate {
