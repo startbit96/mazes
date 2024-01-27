@@ -23,6 +23,7 @@ pub struct Maze {
     pub data: Vec<Vec<bool>>,
     pub is_node: Vec<Vec<bool>>,
     pub collection_position: (usize, usize), // (pos, number of mazes), pos starts at 1
+    pub is_generated: bool,
 }
 
 impl Maze {
@@ -64,6 +65,7 @@ impl Maze {
             data: vec![vec![MAZE_VALUE_BLOCKED; height]; height],
             is_node: vec![vec![false; width]; height],
             collection_position,
+            is_generated: false,
         }
     }
 
@@ -113,12 +115,14 @@ impl Maze {
         self.data[pos.1][pos.0] == MAZE_VALUE_BLOCKED
     }
 
-    fn reset(&mut self) {
-        for row in &mut self.data {
-            for value in row {
-                *value = MAZE_VALUE_BLOCKED;
+    pub fn reset(&mut self) {
+        for row in 0..self.height {
+            for col in 0..self.width {
+                self.data[row][col] = MAZE_VALUE_BLOCKED;
+                self.is_node[row][col] = false;
             }
         }
+        self.is_generated = false;
     }
 
     pub fn reset_start_end_position(&mut self) {
@@ -177,6 +181,7 @@ impl Maze {
         generator.generate(self, screen, animate);
         // Generate the graph once.
         self.generate_graph();
+        self.is_generated = true;
     }
 
     pub fn solve(
@@ -185,9 +190,13 @@ impl Maze {
         screen: &mut dyn Write,
         animate: bool,
     ) -> (Vec<(usize, usize)>, usize) {
-        // Draw the maze again (this may delete the path from the previous solving).
-        self.draw(screen, false, false, false, false, false);
-        solver.solve(self, screen, animate)
+        if self.is_generated {
+            // Draw the maze again (this may delete the path from the previous solving).
+            self.draw(screen, false, false, false, false, false);
+            solver.solve(self, screen, animate)
+        } else {
+            (Vec::new(), 0)
+        }
     }
 
     pub fn draw(

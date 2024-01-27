@@ -21,6 +21,7 @@ Maze-generation and maze-solving written in Rust and visualized in the terminal.
 | Key | Functionality |  
 | :---:   | :---: |  
 | `r` | re-create the maze |  
+| `d` | delete the maze |  
 | `k` or `↑` | increase size of the maze |  
 | `j` or `↓` | decrease size of the maze |  
 | `1` - `5` | set the number of mazes |  

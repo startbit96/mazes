@@ -10,6 +10,14 @@ pub enum MazeContainer {
 }
 
 impl MazeContainer {
+    pub fn reset(&mut self) {
+        if let MazeContainer::SingleMaze(ref mut maze) = self {
+            maze.reset();
+        } else if let MazeContainer::MultipleMazes(ref mut maze_collection) = self {
+            maze_collection.reset();
+        }
+    }
+
     pub fn generate(
         &mut self,
         generator: &dyn MazeGenerator,

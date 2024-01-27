@@ -32,6 +32,10 @@ impl MazeCollection {
             .all(|maze| maze.change_size(width, height))
     }
 
+    pub fn reset(&mut self) {
+        self.mazes.iter_mut().for_each(|maze| maze.reset());
+    }
+
     pub fn generate(
         &mut self,
         generator: &dyn MazeGenerator,
@@ -50,6 +54,9 @@ impl MazeCollection {
         screen: &mut dyn Write,
         animate: bool,
     ) -> (Vec<(usize, usize)>, usize) {
+        if self.mazes.iter().any(|maze| maze.is_generated == false) {
+            return (Vec::new(), 0);
+        }
         // Reset the start positions and redraw.
         self.mazes
             .iter_mut()

@@ -108,6 +108,17 @@ fn main() {
                     show_grid_representation,
                 );
             }
+            Key::Char('d') => {
+                maze_container.reset();
+                maze_container.draw(
+                    &mut screen,
+                    show_graph,
+                    show_background_graph,
+                    show_binary_representation,
+                    show_background_binary_representation,
+                    show_grid_representation,
+                );
+            }
             Key::Char('r') => {
                 // Reset the informations in the UI.
                 terminal_ui::print_informations(
