@@ -12,7 +12,7 @@ pub use kruskal::Kruskal;
 pub use recursive_backtracking::RecursiveBacktracking;
 pub use wilson::Wilson;
 
-pub trait MazeGenerator {
+pub trait MazeGenerator: Send + Sync {
     fn generate(&self, maze: &mut Maze, screen: &mut dyn Write, animate: bool);
 
     fn to_string(&self) -> String;

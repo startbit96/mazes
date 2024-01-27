@@ -5,12 +5,15 @@ use crate::maze::solver::*;
 use std::collections::HashMap;
 use std::fs::File;
 use std::io::{Result, Write};
+use std::sync::{Arc, Mutex};
+use std::thread;
 
 const BENCHMARK_MAZE_WIDTH: usize = 45;
 const BENCHMARK_MAZE_HEIGHT: usize = 45;
 const BENCHMARK_NUMBER_OF_MAZES_PER_GENERATION_ALGORITHM: usize = 25000;
 const BENCHMARK_CHUNK_SIZE: usize = 2;
 const BENCHMARK_NUMBER_OF_RANDOM_POSITIONS_PER_MAZE: usize = 25;
+const BENCHMARK_NUMBER_OF_THREADS: usize = 12;
 
 pub struct NullWriter;
 
@@ -61,16 +64,15 @@ impl BenchmarkResultCollection {
     }
 
     pub fn benchmark_next_chunk(&mut self) -> (bool, usize) {
-        let mut screen = NullWriter;
-        let generation_algorithms: Vec<&dyn MazeGenerator> =
-            vec![&Kruskal, &RecursiveBacktracking, &Wilson];
-        let solving_algorithms: Vec<&dyn MazeSolver> = vec![
+        let generation_algorithms: Arc<Vec<&dyn MazeGenerator>> =
+            Arc::new(vec![&Kruskal, &RecursiveBacktracking, &Wilson]);
+        let solving_algorithms: Arc<Vec<&dyn MazeSolver>> = Arc::new(vec![
             &BreadthFirstSearch,
             &DepthFirstSearch,
             &AStar,
             &AStarWeighted,
             &GreedyBestFirstSearch,
-        ];
+        ]);
 
         // Are we done?
         if self.results.len()
@@ -87,53 +89,78 @@ impl BenchmarkResultCollection {
             );
         }
 
-        let mut maze_id = self.calculate_current_number_of_mazes();
-        let maze_id_end = std::cmp::min(
-            maze_id + BENCHMARK_CHUNK_SIZE * generation_algorithms.len(),
-            Self::calculate_total_number_of_mazes(generation_algorithms.len()),
-        );
-        while maze_id < maze_id_end {
-            for generation_algorithm in generation_algorithms.iter() {
-                let mut maze = Maze::new(BENCHMARK_MAZE_WIDTH, BENCHMARK_MAZE_HEIGHT, (1, 1));
-                if maze.change_size(BENCHMARK_MAZE_WIDTH, BENCHMARK_MAZE_HEIGHT) == false {
-                    panic!();
-                };
-                maze.generate(*generation_algorithm, &mut screen, false);
-                for i in 0..=BENCHMARK_NUMBER_OF_RANDOM_POSITIONS_PER_MAZE {
-                    if i > 0 {
-                        maze.set_random_start_end_position();
-                    }
-                    let mut inspected_cells_per_solving_algorithm: HashMap<String, usize> =
-                        HashMap::new();
-                    let mut path_length = 0;
-                    for solving_algorithm in solving_algorithms.iter() {
-                        // Solve the maze and count the number of inspected cells.
-                        let (path, number_of_inspected_cells) =
-                            maze.solve(*solving_algorithm, &mut screen, false);
-                        if path_length != 0 && path_length != path.len() {
-                            panic!()
+        let maze_id_start = self.calculate_current_number_of_mazes();
+        let chunk_results: Arc<Mutex<Vec<BenchmarkResult>>> = Arc::new(Mutex::new(Vec::new()));
+        let mut thread_handles = Vec::new();
+        for idx_thread in 0..BENCHMARK_NUMBER_OF_THREADS {
+            let chunk_results_clone = chunk_results.clone();
+            let generation_algorithms = generation_algorithms.clone();
+            let solving_algorithms = solving_algorithms.clone();
+            let thread_handle = thread::spawn(move || {
+                let mut screen = NullWriter;
+                let mut thread_results: Vec<BenchmarkResult> = Vec::new();
+                let mut maze_id =
+                    maze_id_start + idx_thread * BENCHMARK_CHUNK_SIZE * generation_algorithms.len();
+                let maze_id_end = std::cmp::min(
+                    maze_id + BENCHMARK_CHUNK_SIZE * generation_algorithms.len(),
+                    Self::calculate_total_number_of_mazes(generation_algorithms.len()),
+                );
+                while maze_id < maze_id_end {
+                    for generation_algorithm in generation_algorithms.iter() {
+                        let mut maze =
+                            Maze::new(BENCHMARK_MAZE_WIDTH, BENCHMARK_MAZE_HEIGHT, (1, 1));
+                        if maze.change_size(BENCHMARK_MAZE_WIDTH, BENCHMARK_MAZE_HEIGHT) == false {
+                            panic!();
+                        };
+                        maze.generate(*generation_algorithm, &mut screen, false);
+                        for i in 0..=BENCHMARK_NUMBER_OF_RANDOM_POSITIONS_PER_MAZE {
+                            if i > 0 {
+                                maze.set_random_start_end_position();
+                            }
+                            let mut inspected_cells_per_solving_algorithm: HashMap<String, usize> =
+                                HashMap::new();
+                            let mut path_length = 0;
+                            for solving_algorithm in solving_algorithms.iter() {
+                                // Solve the maze and count the number of inspected cells.
+                                let (path, number_of_inspected_cells) =
+                                    maze.solve(*solving_algorithm, &mut screen, false);
+                                if path_length != 0 && path_length != path.len() {
+                                    panic!()
+                                }
+                                path_length = path.len();
+                                inspected_cells_per_solving_algorithm.insert(
+                                    solving_algorithm.to_string(),
+                                    number_of_inspected_cells,
+                                );
+                            }
+                            thread_results.push(BenchmarkResult {
+                                maze_id,
+                                generation_algorithm: generation_algorithm.to_string(),
+                                manhattan_distance: calculate_manhattan_distance(
+                                    maze.pos_start,
+                                    maze.pos_end,
+                                ),
+                                path_length,
+                                inspected_cells_per_solving_algorithm,
+                            });
                         }
-                        path_length = path.len();
-                        inspected_cells_per_solving_algorithm
-                            .insert(solving_algorithm.to_string(), number_of_inspected_cells);
+                        maze_id += 1;
                     }
-                    self.results.push(BenchmarkResult {
-                        maze_id,
-                        generation_algorithm: generation_algorithm.to_string(),
-                        manhattan_distance: calculate_manhattan_distance(
-                            maze.pos_start,
-                            maze.pos_end,
-                        ),
-                        path_length,
-                        inspected_cells_per_solving_algorithm,
-                    });
                 }
-                maze_id += 1;
-            }
+                let mut guard = chunk_results_clone.lock().unwrap();
+                guard.append(&mut thread_results);
+            });
+            thread_handles.push(thread_handle);
         }
+        for thread_handle in thread_handles {
+            thread_handle.join().unwrap();
+        }
+        let chunk_results_clone = chunk_results.clone();
+        let mut chunk_results = chunk_results_clone.lock().unwrap();
+        self.results.append(&mut chunk_results);
         (
             true,
-            ((maze_id_end as f64
+            ((self.calculate_current_number_of_mazes() as f64
                 / Self::calculate_total_number_of_mazes(generation_algorithms.len()) as f64)
                 * 100_f64) as usize,
         )

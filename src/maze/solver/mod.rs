@@ -18,7 +18,7 @@ pub use depth_first_search::DepthFirstSearch;
 pub use greedy_best_first_search::GreedyBestFirstSearch;
 pub use wall_follower::WallFollower;
 
-pub trait MazeSolver {
+pub trait MazeSolver: Send + Sync {
     fn solve(
         &self,
         maze: &mut Maze,
