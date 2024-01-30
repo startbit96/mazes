@@ -110,4 +110,15 @@ impl MazeContainer {
             maze_collection.reorder();
         }
     }
+
+    pub fn reset_start_end_position(&mut self) {
+        if let MazeContainer::SingleMaze(ref mut maze) = self {
+            maze.reset_start_end_position();
+        } else if let MazeContainer::MultipleMazes(ref mut maze_collection) = self {
+            maze_collection
+                .mazes
+                .iter_mut()
+                .for_each(|maze| maze.reset_start_end_position());
+        }
+    }
 }

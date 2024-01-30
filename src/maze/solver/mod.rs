@@ -2,7 +2,7 @@ use crate::maze::animation::Delay;
 use crate::maze::maze::Maze;
 use std::io::Write;
 
-pub const SOLVING_DELAY: Delay = Delay::Middle;
+pub const SOLVING_DELAY: Delay = Delay::Long;
 
 pub mod a_star;
 pub mod a_star_weighted;

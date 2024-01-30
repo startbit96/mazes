@@ -8,11 +8,11 @@ use std::io::{Result, Write};
 use std::sync::{Arc, Mutex};
 use std::thread;
 
-const BENCHMARK_MAZE_WIDTH: usize = 45;
-const BENCHMARK_MAZE_HEIGHT: usize = 45;
-const BENCHMARK_NUMBER_OF_MAZES_PER_GENERATION_ALGORITHM: usize = 25000;
+const BENCHMARK_MAZE_WIDTH: usize = 151;
+const BENCHMARK_MAZE_HEIGHT: usize = 151;
+const BENCHMARK_NUMBER_OF_MAZES_PER_GENERATION_ALGORITHM: usize = 100;
 const BENCHMARK_CHUNK_SIZE: usize = 2;
-const BENCHMARK_NUMBER_OF_RANDOM_POSITIONS_PER_MAZE: usize = 25;
+const BENCHMARK_NUMBER_OF_RANDOM_POSITIONS_PER_MAZE: usize = 30;
 const BENCHMARK_NUMBER_OF_THREADS: usize = 12;
 
 pub struct NullWriter;

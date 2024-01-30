@@ -188,4 +188,10 @@ impl MazeCollection {
             .enumerate()
             .for_each(|(idx, maze)| maze.collection_position = (idx + 1, self.number_of_mazes));
     }
+
+    pub fn reset_start_end_position(&mut self) {
+        self.mazes
+            .iter_mut()
+            .for_each(|maze| maze.reset_start_end_position());
+    }
 }

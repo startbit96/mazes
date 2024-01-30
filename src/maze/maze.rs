@@ -176,6 +176,7 @@ impl Maze {
     ) {
         // Draw the maze as empty as it is and draw it empty.
         self.reset();
+        self.reset_start_end_position();
         self.draw(screen, false, false, false, false, false);
         // Generate the maze.
         generator.generate(self, screen, animate);

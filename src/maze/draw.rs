@@ -7,9 +7,9 @@ pub const SYMBOL_MAZE_FIELD_BLOCKED: char = '█';
 const SYMBOL_MAZE_ERASED: char = ' ';
 pub const SYMBOL_MAZE_POS_START: char = 'S';
 pub const SYMBOL_MAZE_POS_END: char = 'E';
-pub const SYMBOL_MAZE_POS_CURRENT: char = '⊗';
+pub const SYMBOL_MAZE_POS_CURRENT: char = '◈';
 
-const SYMBOL_MAZE_GRAPH_NODE: char = '◉';
+const SYMBOL_MAZE_GRAPH_NODE: char = '⊚';
 const SYMBOL_MAZE_GRAPH_CONNECTION_HORIZONTAL: char = '─';
 const SYMBOL_MAZE_GRAPH_CONNECTION_VERTICAL: char = '│';
 
@@ -28,7 +28,7 @@ const SYMBOL_MAZE_PATH_SINGLE_POSITION: char = '╳';
 const CHAR_MAZE_ACCESSIBLE: char = '0';
 const CHAR_MAZE_BLOCKED: char = '1';
 
-const MULTIPLE_MAZES_DRAW_DISTANCE: usize = 3;
+const MULTIPLE_MAZES_DRAW_DISTANCE: usize = 2;
 
 #[derive(Clone, Copy)]
 pub enum CellColorType {

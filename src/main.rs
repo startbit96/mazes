@@ -1,4 +1,5 @@
 use maze::benchmark::*;
+use maze::draw::*;
 use maze::generator::*;
 use maze::maze::Maze;
 use maze::maze_collection::MazeCollection;
@@ -140,6 +141,19 @@ fn main() {
                     &mut screen,
                     animate,
                 );
+                maze_container.draw(
+                    &mut screen,
+                    show_graph,
+                    show_background_graph,
+                    show_binary_representation,
+                    show_background_binary_representation,
+                    show_grid_representation,
+                );
+            }
+            Key::Char('e') => {
+                // Reset the current maze. Draw it again. This will erase the drawn path.
+                // This also resets the start and end position (relevant for multiple mazes).
+                maze_container.reset_start_end_position();
                 maze_container.draw(
                     &mut screen,
                     show_graph,
@@ -300,6 +314,53 @@ fn main() {
                     &mut screen,
                     animate,
                 );
+                let solving_sequence = get_solving_sequence(&path);
+                let mut solving_sequence: String = solving_sequence.iter().collect();
+                if solving_sequence.len() == 0 {
+                    solving_sequence = String::from("No solving sequence available.");
+                } else {
+                    solving_sequence.push_str(format!(" ({})", solving_sequence.len()).as_str());
+                }
+                // Print the informations in the UI.
+                terminal_ui::print_informations(
+                    &mut screen,
+                    maze_container.get_size(),
+                    generation_algorithm.to_string(),
+                    solving_algorithm.to_string(),
+                    number_of_inspected_cells,
+                    animate,
+                );
+                terminal_ui::print_solving_sequence(&mut screen, solving_sequence);
+            }
+            Key::Char('f') => {
+                // Only draw the path but not the inspected cells.
+                if let MazeContainer::MultipleMazes(_) = maze_container {
+                    continue;
+                }
+                (
+                    show_graph,
+                    show_background_graph,
+                    show_binary_representation,
+                    show_background_binary_representation,
+                    show_grid_representation,
+                ) = (false, false, false, false, false);
+                let (path, number_of_inspected_cells) = maze_container.solve(
+                    match solving_algorithm {
+                        MazeSolvingAlgorithms::AStar => &AStar,
+                        MazeSolvingAlgorithms::AStarWeighted => &AStarWeighted,
+                        MazeSolvingAlgorithms::BreadthFirstSearch => &BreadthFirstSearch,
+
+                        MazeSolvingAlgorithms::DepthFirstSearch => &DepthFirstSearch,
+                        MazeSolvingAlgorithms::GreedyBestFirstSearch => &GreedyBestFirstSearch,
+                        MazeSolvingAlgorithms::WallFollower => &WallFollower,
+                    },
+                    &mut screen,
+                    false,
+                );
+                maze_container.draw(&mut screen, false, false, false, false, false);
+                if let MazeContainer::SingleMaze(ref maze) = maze_container {
+                    draw_path(&mut screen, &maze, path.clone(), Some(CellColorType::Path));
+                }
                 let solving_sequence = get_solving_sequence(&path);
                 let mut solving_sequence: String = solving_sequence.iter().collect();
                 if solving_sequence.len() == 0 {
@@ -595,6 +656,16 @@ fn main() {
                     show_background_binary_representation,
                     show_grid_representation,
                 );
+                // Reset the informations.
+                terminal_ui::print_informations(
+                    &mut screen,
+                    maze_container.get_size(),
+                    generation_algorithm.to_string(),
+                    solving_algorithm.to_string(),
+                    0,
+                    animate,
+                );
+                terminal_ui::print_solving_sequence(&mut screen, String::new());
             }
             Key::Char('t') => {
                 // Benchmark.

@@ -1,4 +1,5 @@
 use crate::maze::animation::delay;
+use crate::maze::animation::*;
 use crate::maze::draw::{
     draw_character, get_unique_colors, highlight_cells_by_rgb_color, SYMBOL_MAZE_FIELD_ACCESSIBLE,
 };
@@ -38,7 +39,7 @@ impl MazeGenerator for Kruskal {
                 maze.data[row][col] = MAZE_VALUE_ACCESSIBLE;
                 if animate {
                     draw_character(screen, maze, (col, row), SYMBOL_MAZE_FIELD_ACCESSIBLE, None);
-                    delay(GENERATION_DELAY);
+                    delay(Delay::Short);
                 }
             }
         }
@@ -53,7 +54,9 @@ impl MazeGenerator for Kruskal {
             for (idx, tree) in forest.iter().enumerate() {
                 highlight_cells_by_rgb_color(screen, maze, tree.clone(), colors[idx]);
             }
-            delay(GENERATION_DELAY);
+            for _ in 0..30 {
+                delay(GENERATION_DELAY);
+            }
         }
 
         // Get all possible edges. We will not use all but only that much
@@ -149,7 +152,9 @@ impl MazeGenerator for Kruskal {
             }
         }
         if animate {
-            delay(GENERATION_DELAY);
+            for _ in 0..30 {
+                delay(GENERATION_DELAY);
+            }
         }
     }
 

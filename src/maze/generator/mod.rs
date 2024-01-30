@@ -2,7 +2,7 @@ use crate::maze::animation::Delay;
 use crate::maze::maze::Maze;
 use std::io::Write;
 
-pub const GENERATION_DELAY: Delay = Delay::Middle;
+pub const GENERATION_DELAY: Delay = Delay::Long;
 
 pub mod kruskal;
 pub mod recursive_backtracking;
