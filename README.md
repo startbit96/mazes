@@ -89,7 +89,7 @@ For understanding and implementing the algorithms, the Python API [mazelib](http
 
 ### Simultaneous Maze Solving: Solve in Order
 
-<img src="./assets/parallel_animation.gif" alt="parallel_animation" style="height: 24em" />
+<img src="./assets/parallel_animation.gif" alt="parallel_animation" />
 
 
 ## Benchmark
