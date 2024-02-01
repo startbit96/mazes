@@ -1,7 +1,7 @@
 # mazes
 Maze-generation and maze-solving written in Rust and visualized in the terminal.  
 
-<img align="middle" src="./assets/full_animation.gif" alt="full_animation" />
+<img align="middle" src="./assets/full_animation.gif" alt="full_animation" width="12em" height="12em" />
 
 ## Overview.
 
