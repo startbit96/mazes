@@ -5,8 +5,8 @@
 out
 
 # Benchmark results
-*.csv
-*.png
+benchmark_analysis/*.csv
+benchmark_analysis/*.png
 
 # ----- RUST -----
 
