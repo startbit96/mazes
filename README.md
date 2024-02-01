@@ -87,6 +87,11 @@ For understanding and implementing the algorithms, the Python API [mazelib](http
 
 <img src="./assets/greedy_best_first_search_animation.gif" alt="greedy_best_first_search_animation" style="height: 24em" />
 
+### Simultaneous Maze Solving: Solve in Order
+
+<img src="./assets/parallel_animation.gif" alt="parallel_animation" style="height: 24em" />
+
+
 ## Benchmark
 
 The implemented algorithms were compared by creating 25.000 mazes (size 45x45) per generation algorithm and solving them using the different solving algorithms. The solving algorithms can be compared by the number of inspected cells. For each maze the start and end positions were once at the upper left and bottom right corner and 25 times at random positions.
